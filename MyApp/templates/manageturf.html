@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurfZone - Manage Turfs</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles to integrate with Tailwind */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #111827;
+            /* bg-gray-900 */
+        }
+
+        /* Custom scrollbar for a better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+            /* bg-gray-800 */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            /* indigo-600 */
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4338ca;
+            /* indigo-700 */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-200">
+
+    <div class="flex h-screen">
+        <aside class="w-64 flex-shrink-0 bg-gray-800 p-6 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-3 mb-10">
+                    <i class="fas fa-futbol text-green-400 text-3xl"></i>
+                    <h1 class="text-2xl font-bold text-white">TurfZone</h1>
+                </div>
+                <nav class="flex flex-col gap-4">
+                    <a href="{% url 'admindash' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-tachometer-alt w-6 text-center"></i>
+                        <span class="font-semibold">Dashboard</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-users w-6 text-center"></i>
+                        <span>Manage Users</span>
+                    </a>
+                    <a href="{% url 'turfreq' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-file-signature w-6 text-center"></i>
+                        <span>Turf Requests</span>
+                    </a>
+                    <a href="{% url 'manageturf' %}" class="flex items-center gap-3 p-3 rounded-lg bg-gray-900 text-white shadow-md">
+                        <i class="fas fa-layer-group w-6 text-center text-green-400"></i>
+                        <span>Manage Turfs</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-calendar-check w-6 text-center"></i>
+                        <span>Monitor Bookings</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-credit-card w-6 text-center"></i>
+                        <span>Payment Management</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="border-t border-gray-700 pt-4">
+                <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sign-out-alt w-6 text-center text-red-400"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-8 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold text-white">Manage Turfs</h2>
+                <button
+                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                    <i class="fas fa-plus"></i>
+                    <span>Add New Turf</span>
+                </button>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-gray-700/50 uppercase tracking-wider text-xs">
+                        <tr>
+                            <th class="px-6 py-4 font-semibold">Turf</th>
+                            <th class="px-6 py-4 font-semibold">Location</th>
+                            <th class="px-6 py-4 font-semibold">Sport Type</th>
+                            <th class="px-6 py-4 font-semibold">Price / Hour</th>
+                            <th class="px-6 py-4 font-semibold text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700/50">
+                        {% for turf in turfs %}
+                        <tr class="hover:bg-gray-700/40 transition-colors duration-200">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-4">
+                                    {% if turf.image1 %}
+                                    <img src="{{ turf.image1.url }}"
+                                        alt="Greenfield Arena" class="w-20 h-12 object-cover rounded-md shadow-md">
+                                    {% endif %}
+                                    <div>
+                                        <div class="font-semibold text-base text-white">{{ turf.turf_name }}</div>
+                                        <div class="text-xs text-gray-400">ID: TF1001</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-gray-300">{{ turf.address }}</td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="bg-blue-500/20 text-blue-300 text-xs font-semibold px-2.5 py-1 rounded-full">{{ turf.sport_type }}</span>
+                            </td>
+                            <td class="px-6 py-4 font-medium text-green-400">₹{{ turf.price_per_hour }}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex justify-center gap-2">
+                                    <button
+                                        class="p-2 w-9 h-9 rounded-md bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                                        title="Edit">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </button>
+                                    <button class="p-2 w-9 h-9 rounded-md bg-red-600 hover:bg-red-700 transition-colors"
+                                        title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+
+                        </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+</body>
+
+</html>
+       
