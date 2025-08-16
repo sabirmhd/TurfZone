@@ -111,8 +111,9 @@
                 </nav>
             </div>
             <div class="text-center">
-                <button
-                    class="w-full bg-red-500/80 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition">Logout</button>
+                <a
+                    href="{% url 'logout' %}"
+                    class="bg-red-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-red-600 transition flex justify-center items-center space-x-2">Logout</a>
             </div>
         </aside>
 
@@ -183,7 +184,7 @@
                     <button onclick="openAddTurfModal()"
                         class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition flex items-center space-x-2">
                         <i data-feather="plus" class="w-5 h-5"></i>
-                        <span>Add New Turf</span>
+                        <a href="{% url 'turfreg' %}">Add New Turf</a>
                     </button>
                 </div>
                 <div id="owner-turf-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -311,20 +312,7 @@
         // --- Render Functions ---
         function renderOwnerTurfs() {
             const list = document.getElementById('owner-turf-list');
-            // list.innerHTML = ownerTurfs.map(turf => `
-            //     <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg">
-            //         <img src="${turf.image}" alt="${turf.name}" class="w-full h-40 object-cover">
-            //         <div class="p-5">
-            //             <h3 class="text-xl font-bold text-white">${turf.name}</h3>
-            //             <p class="text-gray-400 text-sm mb-3">${turf.location}</p>
-            //             <div class="flex justify-end space-x-2 mt-4">
-            //                 <button class="text-sm bg-blue-500/80 text-white font-semibold py-2 px-3 rounded-lg hover:bg-blue-600">Edit</button>
-            //                 <button class="text-sm bg-red-500/80 text-white font-semibold py-2 px-3 rounded-lg hover:bg-red-600">Delete</button>
-            //             </div>
-            //         </div>
-            //     </div>
-            // `).join('');
-
+        
         }
 
         function renderPendingTurfs() {
@@ -419,40 +407,6 @@
         // --- Modal Logic ---
         const modalContainer = document.getElementById('modal-container');
         const modalContent = document.getElementById('modal-content');
-
-        function openAddTurfModal() {
-            modalContent.innerHTML = `
-                <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-white">&times;</button>
-                <h2 class="text-2xl font-bold text-white mb-6">Add a New Turf</h2>
-                <form class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Turf Name</label>
-                        <input type="text" class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-green-500">
-                    </div>
-                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Location</label>
-                        <input type="text" class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-green-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Base Price per Hour (₹)</label>
-                        <input type="number" class="w-full px-4 py-2 bg-gray-900 border border-gray-700 rounded-lg outline-none focus:ring-2 focus:ring-green-500">
-                    </div>
-                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Upload Images</label>
-                        <input type="file" multiple class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-600 file:text-white hover:file:bg-green-700">
-                    </div>
-                    <div class="flex justify-end pt-4">
-                        <button type="submit" class="bg-green-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-600">Save Turf</button>
-                    </div>
-                </form>
-            `;
-            modalContainer.classList.remove('hidden');
-        }
-
-        function closeModal() {
-            modalContainer.classList.add('hidden');
-        }
-        modalContainer.addEventListener('click', closeModal);
 
         // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', () => {

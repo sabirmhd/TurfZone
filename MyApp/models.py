@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings 
+from decimal import Decimal
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 class UserManager(BaseUserManager):
@@ -61,7 +62,10 @@ class Turf(models.Model):
     state = models.CharField(max_length=50)
     address = models.CharField(max_length=255)
     pincode = models.CharField(max_length=10)
-    price_per_hour = models.DecimalField(max_digits=6, decimal_places=2)
+    price_per_hour = models.DecimalField(
+    max_digits=7,
+    decimal_places=2,
+    )
     opening_time = models.TimeField()
     closing_time = models.TimeField()
     facilities = models.ManyToManyField('Facility', blank=True)
@@ -69,8 +73,10 @@ class Turf(models.Model):
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.turf_name} - {self.city}"
+    def save(self, *args, **kwargs):
+        if not self.location:
+            self.location = f"{self.city},{self.state},{self.address}"
+        super().save(*args, **kwargs)
 
 class Facility(models.Model):
     name = models.CharField(max_length=50, choices=FACILITY_CHOICES, unique=True)

@@ -60,7 +60,7 @@
                         <i class="fas fa-tachometer-alt w-6 text-center"></i>
                         <span class="font-semibold">Dashboard</span>
                     </a>
-                    <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                    <a href="{% url 'manageusers' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
                         <i class="fas fa-users w-6 text-center"></i>
                         <span>Manage Users</span>
                     </a>
@@ -84,7 +84,7 @@
                 </nav>
             </div>
             <div class="border-t border-gray-700 pt-4">
-                <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                <a href="{% url 'logout' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
                     <i class="fas fa-sign-out-alt w-6 text-center text-red-400"></i>
                     <span>Logout</span>
                 </a>
@@ -97,7 +97,7 @@
                 <button
                     class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
                     <i class="fas fa-plus"></i>
-                    <span>Add New Turf</span>
+                    <a href="{% url 'turfreg' %}">Add New Turf</a>
                 </button>
             </div>
 

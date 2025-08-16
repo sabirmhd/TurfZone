@@ -165,46 +165,44 @@ def userhome(request):
     turfs= Turf.objects.filter(is_approved=True)
     user_id=request.user.id
     bookings=TurfBooking.objects.filter(user_id=user_id).select_related('turf')
-    # location = request.GET.get('location', '').strip()
-    # date = request.GET.get('date', '').strip()
-    # time_filter = request.GET.get('time', '').strip()
+    location = request.GET.get('location', '').strip()
+    date = request.GET.get('date', '').strip()
 
-    # # Filter by location (case-insensitive match)
-    # if location:
-    #     turfs = turfs.filter(
-    #         Q(city__icontains=location) | Q(state__icontains=location) | Q(address__icontains=location)
-    #     )
+    # Filter by location (case-insensitive match)
+    if location:
+        turfs = turfs.filter(
+            Q(city__icontains=location) | Q(state__icontains=location) | Q(address__icontains=location)
+        )
 
-    # # Filter by date (if your Turf has an availability model, adapt here)
-    # if date:
-    #     try:
-    #         filter_date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
-    #         turfs = turfs.filter(available_dates__contains=filter_date)  # Example: ManyToMany or availability field
-    #     except ValueError:
-    #         pass
-
-    # # Filter by time of day
-    # if time_filter:
-    #     if time_filter == 'morning':
-    #         turfs = turfs.filter(start_time__hour__gte=6, start_time__hour__lt=12)
-    #     elif time_filter == 'afternoon':
-    #         turfs = turfs.filter(start_time__hour__gte=12, start_time__hour__lt=17)
-    #     elif time_filter == 'evening':
-    #         turfs = turfs.filter(start_time__hour__gte=17, start_time__hour__lt=22)
-
+    # Filter by date (if your Turf has an availability model, adapt here)
+    if date:
+        try:
+            filter_date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+            turfs = turfs.filter(available_dates__contains=filter_date)  # Example: ManyToMany or availability field
+        except ValueError:
+            pass
+        
     context = {
         'turfs': turfs,
         'bookings': bookings,
-        # 'selected_location': location,
-        # 'selected_date': date,
-        # 'selected_time': time_filter,
+        'selected_location': location,
     }
     return render(request, 'userhome.html',context)
 
 def admindash(request):
+    turfapproved = Turf.objects.filter(is_approved = True)
+    turfpending = Turf.objects.filter(is_approved = False)
+    turfusers = User.objects.all()
+    context = {
+        'turfpending' : turfpending,
+        'turfapproved': turfapproved,
+        'turfusers' : turfusers
+    }
     if request.user.role == 'admin':
-        return render(request, 'admindash.html')
-
+        return render(request, 'admindash.html',context)
+    
+    
+@login_required
 def ownerhome(request):
     
     pendingTurf = request.user.turfs.filter(is_approved = False)
@@ -294,4 +292,8 @@ def listbooking(request):
     user_id=request.user.id
     bookings=TurfBooking.objects.filter(user_id=user_id).select_related('turf')
     return render(request,'listbooking.html',{'bookings':bookings})
+
+def manageusers(request):
+    allusers = User.objects.all()
+    return render(request,'manageusers.html',{'allusers': allusers})
 

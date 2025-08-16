@@ -38,4 +38,5 @@ urlpatterns = [
     path('reject-turf/<int:turf_id>',views.reject_turf, name='reject_turf'), 
     path('booking/<int:id>',views.booking, name='booking'), 
     path('listbooking/',views.listbooking, name='listbooking'), 
+    path('manageusers/',views.manageusers, name='manageusers'), 
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT )
