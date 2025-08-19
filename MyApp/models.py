@@ -25,6 +25,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     role = models.CharField(default='player')
     phone=models.CharField(max_length=10, unique=True)
     is_staff = models.BooleanField(default=False)
+    is_blocked = models.BooleanField(default=False)
     
     objects = UserManager()
 

@@ -1,8 +1,8 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Turf,Facility,TurfBooking
+from .models import User,Turf,Facility,TurfBooking
 from datetime import datetime,date, timedelta
 from decimal import Decimal
 from django.db.models import Q
@@ -20,20 +20,24 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
 
         if user is not None:
+            if user.is_blocked:  
+                messages.error(request, "Your account has been blocked. Contact admin.")
+                return redirect("login")
+
             login(request, user)
+            messages.success(request, "Login Successful!")
+
             if user.role == 'admin':
                 return redirect('admindash')
             elif user.role == 'owner':
                 return redirect('ownerhome')
             else:
-                return redirect('userhome')
-        
+                return redirect("userhome")
+
         else:
             messages.error(request, 'Invalid email or password.')
 
     return render(request, 'login.html')
-
-# from .models import UserProfile  # Uncomment if you're using a profile model
 
 def register(request):
     if request.method == 'POST':
@@ -61,8 +65,6 @@ def register(request):
             messages.error(request, "Phone number already registered.")
             return render(request, 'register.html')
 
-        # Determine role: False = player, True = owner
-
         # Create user using custom manager
         User.objects.create_user(
             email=email,
@@ -73,12 +75,8 @@ def register(request):
         )
 
         messages.success(request, "Account created successfully.")
-
-        # Redirect based on user_type
-        if user_type == 'owner':
-            return redirect('turfreg')  # for owner
-        else:
-            return redirect('userhome')   # for player
+        
+        return redirect('login')
 
     return render(request, 'register.html')
 
@@ -119,6 +117,7 @@ def change_password(request):
 
 def logout_view(request):
     logout(request)
+    messages.success(request, "You have been logged out successfully!")
     return redirect('landing')
 
 
@@ -296,4 +295,19 @@ def listbooking(request):
 def manageusers(request):
     allusers = User.objects.all()
     return render(request,'manageusers.html',{'allusers': allusers})
+
+
+def block_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user.is_blocked = True   
+    user.save()
+    messages.success(request, f"{user.fullname} has been blocked.")
+    return redirect('manageusers')
+
+def unblock_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user.is_blocked = False  
+    user.save()
+    messages.success(request, f"{user.fullname} has been unblocked.")
+    return redirect('manageusers')
 
