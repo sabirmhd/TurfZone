@@ -41,4 +41,6 @@ urlpatterns = [
     path('manageusers/',views.manageusers, name='manageusers'),
     path('block/<int:user_id>/', views.block_user, name='block_user'),
     path('unblock/<int:user_id>/', views.unblock_user, name='unblock_user'),
+    path('owner/confirm-booking/<int:booking_id>/', views.confirm_booking, name='confirm_booking'),
+    path('owner/home/', views.ownerhome, name='ownerhome'),
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT )

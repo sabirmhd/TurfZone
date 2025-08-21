@@ -203,12 +203,15 @@ def admindash(request):
     
 @login_required
 def ownerhome(request):
-    
-    pendingTurf = request.user.turfs.filter(is_approved = False)
-    approvedTurf = request.user.turfs.filter(is_approved = True)
+    pendingTurf = request.user.turfs.filter(is_approved=False)
+    approvedTurf = request.user.turfs.filter(is_approved=True)
+
+    bookings = TurfBooking.objects.filter(turf__owner=request.user).select_related("turf", "user")
+
     context = {
         'pending': pendingTurf,
         'approved': approvedTurf,
+        'bookings': bookings,
     }
     return render(request, 'ownerhome.html', context)
 
@@ -310,4 +313,17 @@ def unblock_user(request, user_id):
     user.save()
     messages.success(request, f"{user.fullname} has been unblocked.")
     return redirect('manageusers')
+
+def confirm_booking(request, booking_id):
+    booking = get_object_or_404(TurfBooking, id=booking_id, turf__owner=request.user)
+
+    if booking.status == "pending":
+        booking.status = "confirmed"
+        booking.save()
+        messages.success(request, "Booking confirmed successfully.")
+    else:
+        messages.warning(request, "This booking is already confirmed or completed.")
+
+    return redirect('ownerhome')
+
 

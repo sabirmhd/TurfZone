@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 from django.urls import reverse
-from django.contrib import messages   # ✅ Import messages
+from django.contrib import messages 
 
 class BlockUserMiddleware:
     def __init__(self, get_response):
