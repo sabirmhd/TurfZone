@@ -19,6 +19,7 @@ from django.urls import path
 from MyApp import views
 from django.conf.urls.static import static
 from django.conf import settings
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -43,4 +44,28 @@ urlpatterns = [
     path('unblock/<int:user_id>/', views.unblock_user, name='unblock_user'),
     path('owner/confirm-booking/<int:booking_id>/', views.confirm_booking, name='confirm_booking'),
     path('owner/home/', views.ownerhome, name='ownerhome'),
+    path('invoice/<int:booking_id>/', views.download_invoice, name='download_invoice'),
+    
+
+    path(
+        'password_reset/',
+        auth_views.PasswordResetView.as_view(template_name="registration/password_reset_form.html"),
+        name='password_reset'
+    ),
+    path(
+        'password_reset_done/',
+        auth_views.PasswordResetDoneView.as_view(template_name="registration/password_reset_done.html"),
+        name='password_reset_done'
+    ),
+    path(
+        'reset/<uidb64>/<token>/',
+        auth_views.PasswordResetConfirmView.as_view(template_name="registration/password_reset_confirm.html"),
+        name='password_reset_confirm'
+    ),
+    path(
+        'reset/done/',
+        auth_views.PasswordResetCompleteView.as_view(template_name="registration/password_reset_complete.html"),
+        name='password_reset_complete'
+    ),
+
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT )

@@ -6,6 +6,15 @@ from .models import User,Turf,Facility,TurfBooking
 from datetime import datetime,date, timedelta
 from decimal import Decimal
 from django.db.models import Q
+from django.http import HttpResponse, Http404
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, Image
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.units import inch
+from reportlab.lib.utils import ImageReader
+from reportlab.lib.colors import HexColor
 
 User = get_user_model()
 
@@ -326,4 +335,225 @@ def confirm_booking(request, booking_id):
 
     return redirect('ownerhome')
 
+def download_invoice(request, booking_id):
+    try:
+        booking = TurfBooking.objects.get(id=booking_id, user=request.user)
+    except TurfBooking.DoesNotExist:
+        raise Http404("Booking not found")
 
+    # HTTP response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice-{booking.id}.pdf"'
+
+    # Document setup with smaller margins for a more modern look
+    doc = SimpleDocTemplate(response, pagesize=letter,
+                            rightMargin=30, leftMargin=30,
+                            topMargin=40, bottomMargin=30)
+
+    elements = []
+    styles = getSampleStyleSheet()
+
+    # Custom color palette
+    primary_color = colors.HexColor("#22c55e")  # Green accent
+    dark_color = colors.HexColor("#1a1a1a")     # Near black
+    light_color = colors.HexColor("#f8fafc")    # Light background
+    gray_color = colors.HexColor("#64748b")     # Medium gray
+    light_gray = colors.HexColor("#e2e8f0")     # Light gray for borders
+
+    # Custom styles
+    title_style = ParagraphStyle(
+        "title_style",
+        parent=styles["Heading1"],
+        fontSize=24,
+        textColor=dark_color,
+        alignment=TA_CENTER,
+        spaceAfter=10,
+        fontName="Helvetica-Bold"
+    )
+    
+    subtitle_style = ParagraphStyle(
+        "subtitle_style",
+        parent=styles["Normal"],
+        fontSize=12,
+        textColor=gray_color,
+        alignment=TA_CENTER,
+        spaceAfter=30,
+        fontName="Helvetica"
+    )
+    
+    section_header_style = ParagraphStyle(
+        "section_header",
+        parent=styles["Heading2"],
+        fontSize=14,
+        textColor=dark_color,
+        spaceAfter=12,
+        fontName="Helvetica-Bold"
+    )
+    
+    normal_style = ParagraphStyle(
+        "normal_style",
+        parent=styles["Normal"],
+        fontSize=10,
+        textColor=dark_color,
+        fontName="Helvetica"
+    )
+    
+    highlight_style = ParagraphStyle(
+        "highlight_style",
+        parent=styles["Normal"],
+        fontSize=10,
+        textColor=primary_color,
+        fontName="Helvetica-Bold"
+    )
+    
+    footer_style = ParagraphStyle(
+        "footer_style",
+        parent=styles["Normal"],
+        fontSize=9,
+        textColor=gray_color,
+        alignment=TA_CENTER,
+        fontName="Helvetica"
+    )
+
+    # --- Header Section ---
+    # Add a decorative line at the top
+    elements.append(Spacer(1, 10))
+    elements.append(Paragraph("<b>TURFZONE</b>", title_style))
+    elements.append(Paragraph("INVOICE", subtitle_style))
+    
+    # Invoice and date on same line
+    invoice_data = [
+        [Paragraph(f"<b>Invoice No:</b> TZ{booking.id}", normal_style),
+         Paragraph(f"<b>Date:</b> {datetime.now().strftime('%d %b, %Y')}", normal_style)]
+    ]
+    invoice_table = Table(invoice_data, colWidths=[270, 270])
+    invoice_table.setStyle(TableStyle([
+        ("ALIGN", (0, 0), (0, 0), "LEFT"),
+        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+    ]))
+    elements.append(invoice_table)
+    
+    # Divider line
+    elements.append(HRFlowable(width="100%", thickness=1, color=light_gray, spaceAfter=20))
+
+    # --- Booking Details ---
+    elements.append(Paragraph("BOOKING DETAILS", section_header_style))
+    
+    booking_info = [
+        ["Customer:", booking.user.fullname],
+        ["Turf:", booking.turf.turf_name],
+        ["Location:", f"{booking.turf.city}, {booking.turf.state}"],
+        ["Booking Date:", str(booking.booking_date)],
+        ["Time Slot:", f"{booking.start_time} - {booking.end_time}"],
+    ]
+    
+    table = Table(booking_info, hAlign="LEFT", colWidths=[100, 440])
+    table.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("TEXTCOLOR", (0, 0), (0, -1), gray_color),
+        ("TEXTCOLOR", (1, 0), (1, -1), dark_color),
+        ("ALIGN", (0, 0), (0, -1), "LEFT"),
+        ("ALIGN", (1, 0), (1, -1), "LEFT"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("BACKGROUND", (0, 0), (-1, -1), light_color),
+    ]))
+    elements.append(table)
+    elements.append(Spacer(1, 25))
+
+    # --- Pricing Details ---
+    elements.append(Paragraph("PRICE SUMMARY", section_header_style))
+    
+    # Calculate hours with proper decimal handling
+    try:
+        
+        start = datetime.combine(date.today(), booking.start_time)
+        end = datetime.combine(date.today(), booking.end_time)
+
+        # Handle case where end_time is next day (overnight booking)
+        if end < start:
+            end = end.replace(day=end.day + 1)
+
+        time_diff = end - start   # this gives timedelta
+        hours = time_diff.total_seconds() / 3600
+        
+        # Convert Decimal to float for calculation
+        total_amount_float = float(booking.total_amount)
+        rate_per_hour = total_amount_float / hours if hours > 0 else total_amount_float
+        
+        # Format for display
+        hours_str = f"{hours:.1f}"
+        rate_str = f"{rate_per_hour:.0f}"
+    except (TypeError, AttributeError, ValueError):
+        # Fallback if there's any issue with the calculation
+        hours_str = "N/A"
+        rate_str = "N/A"
+    
+    pricing_data = [
+        ["Description", "Hours", "Rate (INR)", "Amount (INR)"],
+        ["Turf Booking", hours_str, rate_str, f"{booking.total_amount} INR"]
+    ]
+    
+    pricing_table = Table(pricing_data, colWidths=[220, 80, 80, 100])
+    pricing_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), primary_color),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("GRID", (0, 0), (-1, -1), 0.5, light_gray),
+        ("BACKGROUND", (0, 1), (-1, -1), light_color),
+        ("ALIGN", (3, 1), (3, -1), "RIGHT"),
+        ("FONTNAME", (3, -1), (3, -1), "Helvetica-Bold"),
+    ]))
+    elements.append(pricing_table)
+    elements.append(Spacer(1, 15))
+    
+    # Total row
+    total_data = [
+        ["", "", "Total:", f"{booking.total_amount} INR"]
+    ]
+    total_table = Table(total_data, colWidths=[220, 80, 80, 100])
+    total_table.setStyle(TableStyle([
+        ("FONTSIZE", (0, 0), (-1, -1), 11),
+        ("ALIGN", (2, 0), (2, 0), "RIGHT"),
+        ("ALIGN", (3, 0), (3, 0), "RIGHT"),
+        ("FONTNAME", (2, 0), (3, 0), "Helvetica-Bold"),
+        ("LINEABOVE", (2, 0), (3, 0), 1, dark_color),
+    ]))
+    elements.append(total_table)
+    elements.append(Spacer(1, 30))
+
+    # --- Payment Method ---
+    elements.append(Paragraph("PAYMENT METHOD", section_header_style))
+    payment_info = [
+        ["Method:", "Online Payment"],
+        ["Status:", "Paid"],
+        ["Date:", str(booking.booking_date)]
+    ]
+    
+    payment_table = Table(payment_info, hAlign="LEFT", colWidths=[100, 440])
+    payment_table.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("TEXTCOLOR", (0, 0), (0, -1), gray_color),
+        ("TEXTCOLOR", (1, 0), (1, -1), dark_color),
+        ("ALIGN", (0, 0), (0, -1), "LEFT"),
+        ("ALIGN", (1, 0), (1, -1), "LEFT"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+        ("BACKGROUND", (0, 0), (-1, -1), light_color),
+    ]))
+    elements.append(payment_table)
+    elements.append(Spacer(1, 40))
+
+    # --- Footer ---
+    elements.append(HRFlowable(width="100%", thickness=0.5, color=light_gray, spaceAfter=12))
+    elements.append(Paragraph("Thank you for your business!", footer_style))
+    elements.append(Paragraph("Questions? Email support@turfzone.com or visit www.turfzone.com", footer_style))
+    elements.append(Spacer(1, 10))
+    elements.append(Paragraph("TurfZone • 123 Sports Avenue • City, State 12345", footer_style))
+
+    # Build PDF
+    doc.build(elements)
+    return response
