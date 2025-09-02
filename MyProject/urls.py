@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib.auth import views as auth_views
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.landing, name='landing'),
@@ -67,5 +68,7 @@ urlpatterns = [
         auth_views.PasswordResetCompleteView.as_view(template_name="registration/password_reset_complete.html"),
         name='password_reset_complete'
     ),
-
+    path("turf/<int:turf_id>/", views.turf_detail, name="turf_detail"),
+    path("turf/<int:turf_id>/review/", views.add_review, name="add_review"),
+    path("invoice/<int:booking_id>/view/", views.view_invoice, name="view_invoice"),
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT )

@@ -16,6 +16,8 @@
 
     <!-- Feather Icons -->
     <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 
     <style>
         body {
@@ -89,7 +91,7 @@
                     <span class="text-green-400">Turf</span>Zone
                 </div>
                 <nav class="hidden md:flex items-center space-x-6">
-                    <a href="{% url 'userhome' %}" class="text-gray-300 hover:text-green-400 transition">Browse
+                    <a href="#browse" class="text-gray-300 hover:text-green-400 transition">Browse
                         Turfs</a>
                     <a href="{% url 'listbooking' %}" class="text-gray-300 hover:text-green-400 transition">My
                         Bookings</a>
@@ -119,7 +121,8 @@
                 <form method="GET" action="{% url 'userhome' %}"
                     class="bg-gray-800/50 backdrop-blur-md p-4 rounded-xl max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-3 items-center">
 
-                    <input type="text" value="{{ selected_location }}" name="location" placeholder="Search by location (e.g., Mumbai)"
+                    <input type="text" value="{{ selected_location }}" name="location"
+                        placeholder="Search by location (e.g., Mumbai)"
                         class="md:col-span-2 lg:col-span-2 w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 outline-none">
 
                     <input type="date" name="date" id="date-filter"
@@ -151,7 +154,7 @@
                             <div class="flex justify-between items-center mb-4">
                                 <span class="text-lg font-semibold text-green-400">₹{{ turf.price_per_hour }}/hr</span>
                                 <span
-                                    class="flex items-center space-x-1 bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-sm font-bold">
+                                    class="flex items-center space-x-1 bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-sm font-bold">{{ turf.avg_rating }}
                                     <i data-feather="star" class="w-4 h-4 fill-current"></i>
                                 </span>
                             </div>
@@ -204,9 +207,62 @@
     <!-- <div id="booking-modal" class="modal hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
         <div class="bg-gray-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 relative"
             onclick="event.stopPropagation()"> -->
-            <!-- Modal content will be injected here -->
-        <!-- </div>
+    <!-- Modal content will be injected here -->
+    <!-- </div>
     </div> -->
+
+<!-- Hidden Review Modal -->
+<div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-gray-900 rounded-xl p-6 w-full max-w-lg">
+        <h3 class="text-2xl font-semibold text-green-400 mb-4">Leave a Review</h3>
+        
+        <form id="reviewForm" method="POST" action="">
+            {% csrf_token %}
+            
+            <!-- Rating -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Your Rating</label>
+                    <div id="star-rating"
+                        class="flex justify-start items-center space-x-1 text-2xl text-gray-500">
+                        <input type="radio" id="star5" name="rating" value="5" class="sr-only" />
+                        <label for="star5" class="cursor-pointer"><i class="fas fa-star"></i></label>
+                        <input type="radio" id="star4" name="rating" value="4" class="sr-only" />
+                        <label for="star4" class="cursor-pointer"><i class="fas fa-star"></i></label>
+                        <input type="radio" id="star3" name="rating" value="3" class="sr-only" />
+                        <label for="star3" class="cursor-pointer"><i class="fas fa-star"></i></label>
+                        <input type="radio" id="star2" name="rating" value="2" class="sr-only" />
+                        <label for="star2" class="cursor-pointer"><i class="fas fa-star"></i></label>
+                        <input type="radio" id="star1" name="rating" value="1" class="sr-only" />
+                        <label for="star1" class="cursor-pointer"><i class="fas fa-star"></i></label>
+                    </div>
+           </div>
+
+
+            <!-- Comment -->
+            <div class="mt-4">
+                <label for="comment" class="block text-sm font-medium text-gray-300 mb-1">Your Review</label>
+                <textarea id="comment" name="comment" rows="4"
+                    class="w-full bg-gray-700 border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
+                    placeholder="Share your experience..." required></textarea>
+            </div>
+
+            <!-- Buttons -->
+            <div class="mt-6 flex justify-between">
+                <button type="button" id="closeReviewModal"
+                    class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="bg-green-500 hover:bg-green-600 text-gray-900 font-bold px-6 py-2 rounded-lg">
+                    Submit Review
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
 
     <script>
         // --- DOM Elements ---
@@ -217,7 +273,7 @@
         function renderBookings() {
             // Upcoming Bookings (Rendered by Django Template)
             upcomingBookingsContainer.innerHTML = `
-            {% for books in bookings %}
+            {% for books in upcoming_bookings %}
             <div class="bg-gray-900 p-4 rounded-lg flex flex-col md:flex-row items-center gap-5">
                 <img src="{{ books.turf.image1.url }}" alt="{{ books.turf.turf_name }}" class="w-full h-32 md:w-32 md:h-24 rounded-md object-cover">
                 <div class="flex-grow text-center md:text-left">
@@ -230,7 +286,7 @@
                 <div class="flex flex-col items-center md:items-end gap-3 mt-3 md:mt-0">
                     <span class="font-bold text-xl text-green-400">₹{{ books.total_amount }}</span>
                     <div class="flex items-center gap-3">
-                        <button class="text-sm text-blue-400 hover:text-blue-300 font-semibold">View Receipt</button>
+                        <a href="{% url 'view_invoice' books.id %}" target="_blank" class="text-sm text-blue-400 hover:text-blue-300 font-semibold">View Receipt</a>
                         <button class="text-sm text-red-500 hover:text-red-400 font-semibold">Cancel</button>
                     </div>
                 </div>
@@ -260,7 +316,11 @@
                                 <i data-feather="check-circle" class="w-4 h-4"></i>Reviewed
                             </span>
                         {% else %}
-                            <button class="text-sm text-yellow-500 hover:text-yellow-400 font-semibold">Rate & Review</button>
+                            <button 
+                            class="text-sm text-yellow-500 hover:text-yellow-400 font-semibold review-btn" 
+                            data-turf-id="{{ books.turf.id }}">
+                            Rate & Review
+                            </button>
                         {% endif %}
                     </div>
                 </div>
@@ -293,7 +353,79 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderBookings();
         });
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const reviewModal = document.getElementById("reviewModal");
+            const closeModalBtn = document.getElementById("closeReviewModal");
+            const reviewForm = document.getElementById("reviewForm");
+
+            // Open modal when "Rate & Review" is clicked
+            document.querySelectorAll(".review-btn").forEach(button => {
+                button.addEventListener("click", () => {
+                    const turfId = button.getAttribute("data-turf-id");
+                    
+                    // dynamically set form action to match your Django path
+                    reviewForm.action = `/turf/${turfId}/review/`;
+                    
+                    reviewModal.classList.remove("hidden");
+                });
+            });
+
+            // Close modal
+            closeModalBtn.addEventListener("click", () => {
+                reviewModal.classList.add("hidden");
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+        const stars = document.querySelectorAll("#star-rating label i");
+        const inputs = document.querySelectorAll("#star-rating input");
+        let selectedRating = 0;
+
+        stars.forEach((star, index) => {
+            const input = inputs[inputs.length - 1 - index]; 
+            const ratingValue = parseInt(input.value);
+
+            // Hover effect
+            star.parentElement.addEventListener("mouseenter", () => {
+                highlightStars(ratingValue);
+            });
+
+            star.parentElement.addEventListener("mouseleave", () => {
+                highlightStars(selectedRating);
+            });
+
+            // Click (select/unselect)
+            star.parentElement.addEventListener("click", (e) => {
+                e.preventDefault(); 
+                if (selectedRating === ratingValue) {
+                    selectedRating = 0;
+                    input.checked = false;
+                } else {
+                    selectedRating = ratingValue;
+                    input.checked = true;
+                }
+                highlightStars(selectedRating);
+            });
+        });
+
+        function highlightStars(rating) {
+            stars.forEach((star, index) => {
+                const value = parseInt(inputs[inputs.length - 1 - index].value);
+                if (value <= rating) {
+                    star.classList.add("text-yellow-400");
+                    star.classList.remove("text-gray-500");
+                } else {
+                    star.classList.remove("text-yellow-400");
+                    star.classList.add("text-gray-500");
+                }
+            });
+        }
+    });
+
     </script>
-{% include "message.html" %}
+    {% include "message.html" %}
 </body>
+
 </html>

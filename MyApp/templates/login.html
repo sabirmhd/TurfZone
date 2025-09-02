@@ -8,6 +8,7 @@
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
 
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -67,9 +68,22 @@
 
                 <!-- Password Input -->
                 <div>
-                    <label for="signup-password" class="text-sm font-medium text-gray-300">Password</label>
-                    <input type="password" id="signup-password" name="password" placeholder="••••••••"
-                        class="mt-1 w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition">
+                      <label for="signup-password" class="text-sm font-medium text-gray-300">Password</label>
+                        <div class="relative mt-1">
+                            <input
+                            type="password"
+                            id="signup-password"
+                            name="password"
+                            placeholder="••••••••"
+                            class="w-full p-3 pr-12 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition"/>
+
+                            <!-- Eye Icon (centered vertically, pinned right) -->
+                        <button type="button" id="togglePassword"
+                            class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-green-400 focus:outline-none" disabled>
+                            <i data-feather="eye"></i>
+                        </button>
+                        </div>
+                        <a href="{% url 'password_reset' %}" id="toggle-link" class="mt-2 block font-medium  text-sm text-right text-green-400 text-center hover:underline">Forgot Password?</a>
                 </div>
 
                 <!-- Submit Button -->
@@ -83,16 +97,47 @@
             <p class="text-center text-gray-400 mt-8">
                 <span id="toggle-text">Don't have an account?</span>
                 <a href="{% url 'register' %}" id="toggle-link"
-                    class="font-medium text-green-400 hover:underline">Register</a><br>
-                <a href="{% url 'password_reset' %}" id="toggle-link"
-                        class="m-auto text-green-400 text-center hover:underline">Forgot password ?</a>
+                    class="font-medium text-green-400 hover:underline">Register</a>
             </p>
         </div>
     </div>
 
     {% include "message.html" %}
 
-
 </body>
+<script>
+        feather.replace(); // render feather icons
+
+        const passwordInput = document.getElementById("signup-password");
+        const togglePassword = document.getElementById("togglePassword");
+
+        // Enable eye icon only when there's input
+        passwordInput.addEventListener("input", () => {
+            if (passwordInput.value.length > 0) {
+            togglePassword.removeAttribute("disabled");
+            togglePassword.classList.remove("cursor-not-allowed", "text-gray-500");
+            togglePassword.classList.add("cursor-pointer", "text-gray-400", "hover:text-green-400");
+            } else {
+            togglePassword.setAttribute("disabled", true);
+            togglePassword.classList.remove("cursor-pointer", "text-gray-400", "hover:text-green-400");
+            togglePassword.classList.add("cursor-not-allowed", "text-gray-500");
+            passwordInput.setAttribute("type", "password"); // always hide again if cleared
+            togglePassword.innerHTML = feather.icons["eye"].toSvg();
+            }
+        });
+
+        // Toggle show/hide password when enabled
+        togglePassword.addEventListener("click", function () {
+            if (this.disabled) return;
+
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+
+            // Change icon based on state
+            this.innerHTML = type === "password"
+            ? feather.icons["eye"].toSvg()
+            : feather.icons["eye-off"].toSvg();
+        });
+</script>
 
 </html>

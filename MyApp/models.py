@@ -3,6 +3,7 @@ from django.conf import settings
 from decimal import Decimal
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
+from django.db.models import Avg
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password = None, **extra_fields):
@@ -81,6 +82,10 @@ class Turf(models.Model):
         if not self.location:
             self.location = f"{self.city},{self.state},{self.address}"
         super().save(*args, **kwargs)
+        
+    @property
+    def avg_rating(self):
+        return self.reviews.aggregate(avg=Avg("rating"))["avg"]   
 
 class Facility(models.Model):
     name = models.CharField(max_length=50, choices=FACILITY_CHOICES, unique=True)
@@ -105,4 +110,24 @@ class TurfBooking(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.fullname} booked {self.turf.turf_name}"
+    
+
+class Review(models.Model):
+    turf = models.ForeignKey(Turf, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
+    rating = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('turf', 'user')  # one review per user per turf
+
+    def __str__(self):
+        return f"Review by {self.user.fullname} on {self.turf.turf_name}"
+
+
+
 
