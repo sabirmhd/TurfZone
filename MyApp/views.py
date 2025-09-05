@@ -841,3 +841,21 @@ def view_invoice(request, booking_id):
 
     doc.build(elements)
     return response
+
+
+@login_required
+def edit_turf(request, turf_id):
+    
+    if request.method == "POST":
+        turf = get_object_or_404(Turf, id=turf_id, owner=request.user)
+
+        turf.turf_name = request.POST.get("turf_name")
+        turf.description = request.POST.get("description")
+        turf.price_per_hour = request.POST.get("price_per_hour")
+
+        if request.FILES.get("image1"):
+            turf.image1 = request.FILES["image1"]
+
+        turf.save()
+    
+    return redirect("ownerhome")

@@ -183,7 +183,14 @@
                             <p class="text-gray-400 text-sm mb-3">{{turf.location}}</p>
                             <div class="flex justify-end space-x-2 mt-4">
                                 <button
-                                    class="text-sm bg-blue-500/80 text-white font-semibold py-2 px-3 rounded-lg hover:bg-blue-600">Edit</button>
+                                    class="text-sm bg-blue-500/80 text-white font-semibold py-2 px-3 rounded-lg hover:bg-blue-600"
+                                    onclick="openEditModal(this)"
+                                    data-turf-id="{{ turf.id }}"
+                                    data-turf-name="{{ turf.turf_name }}"
+                                    data-turf-description="{{ turf.description }}"
+                                    data-turf-price="{{ turf.price_per_hour }}">
+                                    Edit
+                                </button>
                                 <button
                                     class="text-sm bg-red-500/80 text-white font-semibold py-2 px-3 rounded-lg hover:bg-red-600">Delete</button>
                             </div>
@@ -191,6 +198,50 @@
                     </div>
                     {% endfor %}
                 </div>
+
+                <div id="editTurfModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50">
+                            <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 class="text-2xl font-bold text-white">Edit Turf Details</h2>
+                                    <button onclick="closeEditModal()" class="text-gray-400 hover:text-white">&times;</button>
+                                </div>
+
+                                <form id="edit-turf-form" method="POST" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    
+                                    <div class="mb-4">
+                                        <label for="edit-turf-name" class="block text-sm font-medium text-gray-300">Turf Name</label>
+                                        <input type="text" id="edit-turf-name" name="turf_name" required
+                                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="edit-turf-description" class="block text-sm font-medium text-gray-300">Description</label>
+                                        <textarea id="edit-turf-description" name="description" rows="3"
+                                                class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="edit-turf-price" class="block text-sm font-medium text-gray-300">Price Per Hour</label>
+                                        <input type="number" id="edit-turf-price" name="price_per_hour" step="0.01" required
+                                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+                                    
+                                    <div class="mb-6">
+                                        <label for="edit-turf-image" class="block text-sm font-medium text-gray-300">Update Image (Optional)</label>
+                                        <input type="file" id="edit-turf-image" name="image1" accept="image/*"
+                                            class="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    </div>
+
+                                    <div class="flex justify-end space-x-3">
+                                        <button type="button" onclick="closeEditModal()"
+                                                class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">Cancel</button>
+                                        <button type="submit"
+                                                class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
             </section>
 
             <section id="bookings-section" class="content-section hidden">
@@ -374,19 +425,6 @@
         // --- Feather Icons Initialization ---
         feather.replace();
 
-        // --- Mock Data ---
-        // const ownerTurfs = [
-        //     { id: 1, name: 'Pro Football Arena', location: 'Andheri, Mumbai', price: 1500, rating: 4.8, image: 'https://placehold.co/600x400/22c55e/ffffff?text=Pro+Football' },
-        //     { id: 2, name: 'Cricket Central', location: 'Dadar, Mumbai', price: 1200, rating: 4.5, image: 'https://placehold.co/600x400/34d399/ffffff?text=Cricket+Central' },
-        // ];
-
-        // // UPDATED MOCK DATA with location and price
-
-        // const pendingTurfs = [
-        //     { id: 3, name: 'Urban Kickers', location: 'Bandra, Mumbai', price: 1800, sportType: 'Football', image: 'https://placehold.co/600x400/f59e0b/ffffff?text=Urban+Kickers' },
-        //     { id: 4, name: 'The Batting Cage', location: 'Juhu, Mumbai', price: 1000, sportType: 'Cricket', image: 'https://placehold.co/600x400/8b5cf6/ffffff?text=Batting+Cage' },
-        // ];
-
         // --- Navigation Logic ---
         function showSection(sectionId) {
             document.querySelectorAll('.content-section').forEach(section => section.classList.add('hidden'));
@@ -407,70 +445,8 @@
             if (!list) return;
         }
 
-        // NEW: Function to create a detailed booking card
-        function bookingItemHTML(booking) {
-            let statusContent = '';
-            if (booking.status === 'pending') {
-                statusContent = `
-                    <div class="flex items-center gap-3 mt-4 sm:mt-0">
-                        <span class="text-sm font-semibold capitalize px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400">Pending</span>
-                        <button class="bg-green-500 text-white font-bold py-1.5 px-4 rounded-lg text-sm hover:bg-green-600 transition">Confirm</button>
-                    </div>
-                `;
-            } else {
-                const statusClass = booking.status === 'confirmed'
-                    ? 'bg-blue-500/20 text-blue-400'
-                    : 'bg-green-500/20 text-green-400';
-                statusContent = `<span class="text-sm font-semibold capitalize px-3 py-1 rounded-full ${statusClass}">${booking.status}</span>`;
-            }
+  
 
-            return `
-                <div class="bg-gray-900 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-gray-700/50">
-                    <div class="flex-grow">
-                        <div class="flex justify-between items-baseline">
-                            <h3 class="font-bold text-white text-lg">${booking.turfName}</h3>
-                            <p class="text-lg font-bold text-green-400 sm:hidden">₹${booking.price}</p>
-                        </div>
-                        <p class="text-sm text-gray-400 mb-3 flex items-center gap-2"><i data-feather="map-pin" class="w-4 h-4"></i>${booking.location}</p>
-                        <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-300">
-                            <span class="flex items-center gap-1.5"><i data-feather="user" class="w-4 h-4 text-gray-500"></i>${booking.customer}</span>
-                            <span class="flex items-center gap-1.5"><i data-feather="calendar" class="w-4 h-4 text-gray-500"></i>${booking.date}</span>
-                            <span class="flex items-center gap-1.5"><i data-feather="clock" class="w-4 h-4 text-gray-500"></i>${booking.time}</span>
-                        </div>
-                    </div>
-                    <div class="flex flex-col sm:items-end w-full sm:w-auto">
-                         <p class="text-lg font-bold text-green-400 hidden sm:block mb-2">₹${booking.price}</p>
-                         <div class="w-full flex justify-end">
-                            ${statusContent}
-                         </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // UPDATED: Renders the new booking cards into the section
-        function renderBookings() {
-            const container = document.querySelector('#bookings-section');
-            const pending = bookings.filter(b => b.status === 'pending');
-            const confirmedAndCompleted = bookings.filter(b => b.status === 'confirmed' || b.status === 'completed').sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            container.innerHTML = `
-                <h1 class="text-3xl font-bold text-white mb-6">Manage Bookings</h1>
-                <div class="bg-gray-800 p-6 rounded-xl">
-                    <h2 class="text-xl font-bold text-white mb-4">Pending Requests (${pending.length})</h2>
-                    <div class="space-y-4 mb-8">
-                        ${pending.length > 0 ? pending.map(b => bookingItemHTML(b)).join('') : '<p class="text-gray-400 text-center py-4">No pending requests.</p>'}
-                    </div>
-                    
-                    <h2 class="text-xl font-bold text-white mb-4">Confirmed & Past Bookings (${confirmedAndCompleted.length})</h2>
-                    <div class="space-y-4">
-                        ${confirmedAndCompleted.length > 0 ? confirmedAndCompleted.map(b => bookingItemHTML(b)).join('') : '<p class="text-gray-400 text-center py-4">No confirmed or past bookings.</p>'}
-                    </div>
-                </div>
-            `;
-            // Call feather.replace() to render icons in the newly added HTML
-            feather.replace();
-        }
 
         function renderPricingCalendar() {
             const container = document.querySelector('#pricing-section .grid');
@@ -516,6 +492,49 @@
             renderPendingTurfs();
             feather.replace(); // Re-run feather after all dynamic content is added
         });
+
+        // Turf edits
+
+            const modal = document.getElementById('editTurfModal');
+            const editForm = document.getElementById('edit-turf-form');
+            const turfNameInput = document.getElementById('edit-turf-name');
+            const turfDescriptionInput = document.getElementById('edit-turf-description');
+            const turfPriceInput = document.getElementById('edit-turf-price');
+
+            function openEditModal(button) {
+                // Get data from the button's data-* attributes
+                const turfId = button.dataset.turfId;
+                const turfName = button.dataset.turfName;
+                const turfDescription = button.dataset.turfDescription;
+                const turfPrice = button.dataset.turfPrice;
+
+                // Set the form's action URL dynamically
+                editForm.action = `/edit_turf/${turfId}/`;
+
+                // Populate the form fields with the turf's current data
+                turfNameInput.value = turfName;
+                turfDescriptionInput.value = turfDescription;
+                turfPriceInput.value = turfPrice;
+
+                // Show the modal
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function closeEditModal() {
+                // Hide the modal
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            // Optional: Close modal if user clicks outside of the content box
+            window.addEventListener('click', function(event) {
+                if (event.target == modal) {
+                    closeEditModal();
+                }
+            });
+
+
     </script>
     {% include "message.html" %}
 </body>
