@@ -128,15 +128,15 @@
                                 class="text-green-400"></i></div>
                         <div>
                             <p class="text-gray-400 text-sm">Total Revenue</p>
-                            <p class="text-2xl font-bold text-white">₹75,400</p>
+                            <p class="text-2xl font-bold text-white">₹{{ total_revenue }}</p>
                         </div>
                     </div>
                     <div class="bg-gray-800 p-6 rounded-xl flex items-center space-x-4">
                         <div class="bg-blue-500/20 p-3 rounded-full"><i data-feather="calendar"
                                 class="text-blue-400"></i></div>
                         <div>
-                            <p class="text-gray-400 text-sm">Upcoming Bookings</p>
-                            <p class="text-2xl font-bold text-white">12</p>
+                            <p class="text-gray-400 text-sm">Total Bookings</p>
+                            <p class="text-2xl font-bold text-white">{{ total_bookings }}</p>
                         </div>
                     </div>
                     <div class="bg-gray-800 p-6 rounded-xl flex items-center space-x-4">
@@ -144,7 +144,7 @@
                                 class="text-yellow-400"></i></div>
                         <div>
                             <p class="text-gray-400 text-sm">Pending Requests</p>
-                            <p class="text-2xl font-bold text-white">3</p>
+                            <p class="text-2xl font-bold text-white">{{ pending_count }}</p>
                         </div>
                     </div>
                     <div class="bg-gray-800 p-6 rounded-xl flex items-center space-x-4">
@@ -152,7 +152,7 @@
                         </div>
                         <div>
                             <p class="text-gray-400 text-sm">Avg. Rating</p>
-                            <p class="text-2xl font-bold text-white">4.8</p>
+                            <p class="text-2xl font-bold text-white">{{ avg_rating }}</p>
                         </div>
                     </div>
                 </div>
@@ -377,7 +377,7 @@
             <section id="earnings-section" class="content-section hidden">
                 <h1 class="text-3xl font-bold text-white mb-6">Earnings Report</h1>
                 <div class="bg-gray-800 p-6 rounded-xl">
-                    <h2 class="text-xl font-bold text-white mb-4">Revenue This Month</h2>
+                    <h2 class="text-xl font-bold text-white mb-4">Revenue Analytics</h2>
                     <div id="earnings-chart" class="h-64"></div>
                 </div>
             </section>
@@ -434,64 +434,13 @@
             document.querySelector(`a[href="#${sectionId}"]`).classList.add('active');
         }
 
-        // --- Render Functions ---
-        function renderOwnerTurfs() {
-            const list = document.getElementById('owner-turf-list');
 
-        }
-
-        function renderPendingTurfs() {
-            const list = document.getElementById('pending-turf-list');
-            if (!list) return;
-        }
-
-  
-
-
-        function renderPricingCalendar() {
-            const container = document.querySelector('#pricing-section .grid');
-            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            let html = days.map(day => `<div class="font-bold text-white">${day}</div>`).join('');
-
-            for (let i = 0; i < 7 * 5; i++) { // 5 rows of slots
-                const price = 1200 + Math.floor(Math.random() * 5) * 100;
-                html += `<div class="time-slot bg-gray-900 p-2 rounded-lg cursor-pointer border-2 border-transparent">
-                                <p class="font-semibold text-white">₹${price}</p>
-                                <p class="text-gray-400">7-8 PM</p>
-                             </div>`;
-            }
-            container.innerHTML = html;
-        }
-
-        function renderEarningsChart() {
-            const container = document.getElementById('earnings-chart');
-            const data = [15, 25, 40, 30, 50, 65, 70]; // Sample weekly data
-            container.innerHTML = `
-                <div class="flex items-end justify-between h-full w-full gap-2 sm:gap-4">
-                    ${data.map((val, i) => `
-                        <div class="flex-1 flex flex-col items-center justify-end gap-2">
-                            <div class="bg-green-500 w-full rounded-t-lg" style="height: ${val}%"></div>
-                            <p class="text-xs text-gray-400">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
 
         // --- Modal Logic ---
         const modalContainer = document.getElementById('modal-container');
         const modalContent = document.getElementById('modal-content');
 
-        // --- Initial Load ---
-        document.addEventListener('DOMContentLoaded', () => {
-            showSection('dashboard');
-            renderOwnerTurfs();
-            renderBookings(); // This will now render the new detailed cards
-            renderPricingCalendar();
-            renderEarningsChart();
-            renderPendingTurfs();
-            feather.replace(); // Re-run feather after all dynamic content is added
-        });
+
 
         // Turf edits
 
@@ -534,6 +483,50 @@
                 }
             });
 
+
+        //chart
+        const monthlyLabels = JSON.parse('{{ monthly_earnings_labels|safe }}');
+        const monthlyData = JSON.parse('{{ monthly_earnings_data|safe }}');
+
+
+        // --- MODIFIED: The renderEarningsChart function ---
+        function renderEarningsChart() {
+            const container = document.getElementById('earnings-chart');
+
+            // Check if there's any data to avoid errors
+            if (!container || monthlyData.length === 0) return;
+
+            // Find the maximum earning to scale the bars correctly.
+            // Add a check for all-zero data to prevent division by zero.
+            const maxEarning = Math.max(...monthlyData);
+            if (maxEarning === 0) {
+                container.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">No earnings data for this year.</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="flex items-end justify-between h-full w-full gap-2 sm:gap-4">
+                    ${monthlyData.map((val, i) => {
+                        // Calculate bar height as a percentage of the max earning
+                        const barHeight = (val / maxEarning) * 100;
+                        return `
+                        <div class="flex-1 flex flex-col items-center justify-end gap-2 h-full" title="₹${val.toFixed(2)}">
+                            <div class="bg-green-500 w-full rounded-t-lg transition-colors hover:bg-green-400" style="height: ${barHeight}%"></div>
+                            <p class="text-xs text-gray-400">${monthlyLabels[i]}</p>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+
+// --- Initial Load ---
+            document.addEventListener('DOMContentLoaded', () => {
+                showSection('dashboard');
+                renderEarningsChart(); // Call the function to render the chart
+                feather.replace();  // Re-run feather after all dynamic content is added
+            });
 
     </script>
     {% include "message.html" %}

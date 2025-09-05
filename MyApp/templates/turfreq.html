@@ -8,6 +8,7 @@
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
 
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -144,14 +145,75 @@
                             </div>
 
                             <div class="flex gap-2">
-                                <a  href="{% url 'reject_turf' turf.id %}"
-                                    class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reject</a>
-                                <a
-                                    href="{% url 'approve_turf' turf.id %}"
-                                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Approve</a>
+                                <button onclick="document.getElementById('approveModal{{ turf.id }}').showModal()"
+                                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Approve</button>
+                                <button onclick="document.getElementById('rejectModal{{ turf.id }}').showModal()"
+                                    class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reject</button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Approve Modal -->
+                                <dialog id="approveModal{{ turf.id }}" class="modal backdrop-blur-sm">
+                                    <div class="modal-box bg-gray-800 border border-gray-700 rounded-xl shadow-2xl">
+                                        <div class="flex items-center mb-4">
+                                            <div class="p-2 rounded-full bg-green-900/30 mr-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-xl font-bold text-gray-100">Approve {{ turf.turf_name }}?
+                                            </h3>
+                                        </div>
+                                        <p class="py-4 text-gray-300">Are you sure you want to approve this turf request
+                                            from {{ turf.owner.fullname }}?</p>
+                                        <div class="modal-action">
+                                            <form method="dialog" class="flex gap-3">
+                                                <button
+                                                    class="btn btn-ghost hover:bg-gray-700 px-2 text-gray-300 border border-gray-600">
+                                                    Cancel
+                                                </button>
+                                                <a href="{% url 'approve_turf' turf.id %}"
+                                                    class="btn bg-green-600 hover:bg-green-700 text-white border-none shadow-lg shadow-green-900/30">
+                                                    Confirm Approval
+                                                </a>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </dialog>
+
+                                <!-- Reject Modal -->
+                                <dialog id="rejectModal{{ turf.id }}" class="modal backdrop-blur-sm">
+                                    <div class="modal-box bg-gray-800 border border-gray-700 rounded-xl shadow-2xl">
+                                        <div class="flex items-center mb-4">
+                                            <div class="p-2 rounded-full bg-red-900/30 mr-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-400"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-xl font-bold text-gray-100">Reject {{ turf.turf_name }}?
+                                            </h3>
+                                        </div>
+                                        <p class="py-4 text-gray-300">Are you sure you want to reject this turf request
+                                            from {{ turf.owner.fullname }}?</p>
+                                        <div class="modal-action">
+                                            <form method="dialog" class="flex gap-3">
+                                                <button
+                                                    class="btn btn-ghost hover:bg-gray-700 px-2 text-gray-300 border border-gray-600">
+                                                    Cancel
+                                                </button>
+                                                <a href="{% url 'reject_turf' turf.id %}"
+                                                    class="btn bg-red-600 hover:bg-red-700 text-white border-none shadow-lg shadow-red-900/30">
+                                                    Confirm Rejection
+                                                </a>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </dialog>
                 </div>
                 {% endfor %}
                 {% endif %}

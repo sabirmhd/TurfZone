@@ -5,7 +5,7 @@ from django.contrib import messages
 from .models import User,Turf,Facility,TurfBooking,Review
 from datetime import datetime,date, timedelta
 from decimal import Decimal
-from django.db.models import Q,Avg,Count
+from django.db.models import Q,Avg,Count,Sum
 from django.http import HttpResponse, Http404
 from django.utils import timezone
 from reportlab.lib.pagesizes import letter
@@ -19,6 +19,9 @@ from reportlab.lib.colors import HexColor
 from django.db import IntegrityError
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.pagesizes import letter
+from django.db.models.functions import TruncMonth
+import json
+
 
 User = get_user_model()
 
@@ -225,14 +228,51 @@ def ownerhome(request):
     pendingTurf = request.user.turfs.filter(is_approved=False)
     approvedTurf = request.user.turfs.filter(is_approved=True)
 
-    bookings = TurfBooking.objects.filter(turf__owner=request.user).select_related("turf", "user")
+    bookings = TurfBooking.objects.filter(turf__owner=request.user).select_related("turf", "user").order_by('-booking_date')
+    current_year = datetime.now().year
+    total_revenue = bookings.aggregate(total=Sum('total_amount'))['total'] or 0
+    avg_rating = Review.objects.filter(turf__owner=request.user).aggregate(avg=Avg('rating'))['avg'] or 0
+    total_bookings = bookings.count()
+    pending_count = request.user.turfs.filter(is_approved=False).count()
+
+     # 1. Query the database to get earnings grouped by month for confirmed bookings
+    earnings_data = TurfBooking.objects.filter(
+        turf__owner=request.user,
+        status='confirmed',  # Only count confirmed payments
+        booking_date__year=current_year
+    ).annotate(
+        month=TruncMonth('booking_date')
+    ).values(
+        'month'
+    ).annotate(
+        total_earnings=Sum('total_amount')
+    ).order_by('month')
+
+    # 2. Prepare the data for the chart (ensuring all 12 months are present)
+    earnings_per_month = {i: 0 for i in range(1, 13)} # Initialize all months to 0
+    for entry in earnings_data:
+        month_number = entry['month'].month
+        earnings_per_month[month_number] = float(entry['total_earnings']) # Use float for JSON
+
+    # 3. Create final lists for labels and data
+    month_labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    monthly_earnings_data = [earnings_per_month[i] for i in range(1, 13)]
+
 
     context = {
         'pending': pendingTurf,
         'approved': approvedTurf,
         'bookings': bookings,
+        'monthly_earnings_labels': json.dumps(month_labels),
+        'monthly_earnings_data': json.dumps(monthly_earnings_data),
+        "total_revenue": total_revenue,
+        "total_bookings": total_bookings,
+        "avg_rating": round(avg_rating, 1),
+        "pending_count": pending_count,
     }
     return render(request, 'ownerhome.html', context)
+
+
 
 def turfreq(request):
     pending_turfs = Turf.objects.filter(is_approved=False)
@@ -845,7 +885,7 @@ def view_invoice(request, booking_id):
 
 @login_required
 def edit_turf(request, turf_id):
-    
+
     if request.method == "POST":
         turf = get_object_or_404(Turf, id=turf_id, owner=request.user)
 
