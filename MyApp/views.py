@@ -899,3 +899,12 @@ def edit_turf(request, turf_id):
         turf.save()
     
     return redirect("ownerhome")
+
+
+def managebookings(request):
+
+    return render(request, 'managebookings.html')
+
+def managepayments(request):
+
+    return render(request, 'managepayments.html')

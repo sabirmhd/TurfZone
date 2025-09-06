@@ -72,4 +72,7 @@ urlpatterns = [
     path("turf/<int:turf_id>/review/", views.add_review, name="add_review"),
     path("invoice/<int:booking_id>/view/", views.view_invoice, name="view_invoice"),
     path("edit_turf/<int:turf_id>/", views.edit_turf, name="edit_turf"),
+    path('managebookings', views.managebookings, name='managebookings'),
+    path('managepayments', views.managepayments, name='managepayments'),
+
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT )
