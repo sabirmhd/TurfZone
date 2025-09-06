@@ -8,6 +8,7 @@ from decimal import Decimal
 from django.db.models import Q,Avg,Count,Sum
 from django.http import HttpResponse, Http404
 from django.utils import timezone
+from django.utils.timezone import now
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -214,10 +215,36 @@ def admindash(request):
     turfapproved = Turf.objects.filter(is_approved = True)
     turfpending = Turf.objects.filter(is_approved = False)
     turfusers = User.objects.all()
+    owners = (
+        User.objects.filter(role="owner")  # Only owners
+        .annotate(
+            total_revenue=Sum("turfs__bookings__total_amount"),   # Sum of all bookings revenue
+            turfs_owned=Count("turfs", distinct=True)             # Count of turfs owned
+        )
+        .filter(total_revenue__isnull=False)   # Exclude owners with no bookings
+        .order_by("-total_revenue")[:10]       # Top 10 owners by revenue
+    )
+    topturf = (
+        Turf.objects.annotate(total_bookings=Count("bookings"))
+        .order_by("-total_bookings")
+        .select_related("owner")
+        .first()
+    )
+
+    turfearn = (
+        Turf.objects.annotate(total_revenue=Sum("bookings__total_amount"))
+        .order_by("-total_revenue")
+        .select_related("owner")
+        .first()
+    )
+
     context = {
         'turfpending' : turfpending,
         'turfapproved': turfapproved,
-        'turfusers' : turfusers
+        'turfusers' : turfusers,
+        "owners": owners,
+        "topturf": topturf,
+        "turfearn": turfearn,
     }
     if request.user.role == 'admin':
         return render(request, 'admindash.html',context)
@@ -902,8 +929,43 @@ def edit_turf(request, turf_id):
 
 
 def managebookings(request):
+    
+    today = now().date()
 
-    return render(request, 'managebookings.html')
+    # 1. Bookings Today
+    bookings_today = TurfBooking.objects.filter(booking_date=today).count()
+
+    # 2. Bookings This Week (Mon–Sun)
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    bookings_week = TurfBooking.objects.filter(
+        booking_date__range=[start_of_week, end_of_week]
+    ).count()
+
+    # 3. Bookings This Month
+    bookings_month = TurfBooking.objects.filter(
+        booking_date__year=today.year,
+        booking_date__month=today.month,
+    ).count()
+
+    # 4. Total Cancellations
+    total_cancellations = TurfBooking.objects.filter(status="cancelled").count()
+
+    # 5. All bookings list with related turf & user
+    all_bookings = (
+        TurfBooking.objects.select_related("user", "turf")
+        .order_by("-created_at")
+    )
+
+    context = {
+        "bookings_today": bookings_today,
+        "bookings_week": bookings_week,
+        "bookings_month": bookings_month,
+        "total_cancellations": total_cancellations,
+        "all_bookings": all_bookings,
+    }
+
+    return render(request, 'managebookings.html', context)
 
 def managepayments(request):
 

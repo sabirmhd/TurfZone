@@ -147,41 +147,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for owner in top_owners %}
+                                {% for owner in owners %}
                                 <tr class="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
                                     <td class="p-3">
                                         <div class="flex items-center gap-3">
-                                            <img src="https://placehold.co/100x100/1f2937/a7f3d0?text={{ owner.name|slice:':1' }}"
-                                                class="w-8 h-8 rounded-full" alt="Owner">
-                                            <span>{{ owner.name }}</span>
+                                            <img src="https://placehold.co/100x100/1f2937/a7f3d0?text={{ owner.fullname|first|upper }}"
+                                                class="w-8 h-8 rounded-full border-2 border-green-400" alt="Owner">
+                                            <span>{{ owner.fullname }}</span>
                                         </div>
                                     </td>
-                                    <td class="p-3 text-center">{{ owner.turf_count }}</td>
-                                    <td class="p-3 text-right font-semibold text-green-400">${{ owner.revenue }}</td>
+                                    <td class="p-3 text-center">{{ owner.turfs_owned }}</td>
+                                    <td class="p-3 text-right font-semibold text-green-400">${{ owner.total_revenue }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="p-3 text-center text-gray-400">No data available</td>
                                 </tr>
                                 {% endfor %}
-                                <tr class="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
-                                    <td class="p-3">
-                                        <div class="flex items-center gap-3">
-                                            <img src="https://placehold.co/100x100/1f2937/a7f3d0?text=J"
-                                                class="w-8 h-8 rounded-full" alt="Owner">
-                                            <span>John Doe</span>
-                                        </div>
-                                    </td>
-                                    <td class="p-3 text-center">3</td>
-                                    <td class="p-3 text-right font-semibold text-green-400">$8,200</td>
-                                </tr>
-                                <tr class="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
-                                    <td class="p-3">
-                                        <div class="flex items-center gap-3">
-                                            <img src="https://placehold.co/100x100/1f2937/a7f3d0?text=A"
-                                                class="w-8 h-8 rounded-full" alt="Owner">
-                                            <span>Alice Smith</span>
-                                        </div>
-                                    </td>
-                                    <td class="p-3 text-center">2</td>
-                                    <td class="p-3 text-right font-semibold text-green-400">$6,550</td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -191,21 +173,29 @@
                     <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex-grow">
                         <h3 class="font-bold text-white mb-2">Most Booked Turf</h3>
                         <p class="text-gray-400 text-sm mb-4">The turf with the highest number of bookings overall.</p>
+                        {% if topturf %}
                         <div class="text-center bg-gray-900 p-4 rounded-lg">
-                            <p class="text-green-400 text-2xl font-bold">{% if most_booked_turf %}{{ most_booked_turf.name }}{% else %}City Arena{% endif %}</p>
-                            <p class="text-gray-400">by {% if most_booked_turf %}{{ most_booked_turf.owner }}{% else %}John Doe{% endif %}</p>
-                            <p class="mt-3 text-3xl font-bold text-white">{% if most_booked_turf %}{{ most_booked_turf.bookings_count }}{% else %}152{% endif %} <span class="text-base font-normal text-gray-500">Bookings</span></p>
+                            <p class="text-green-400 text-2xl font-bold">{{ topturf.turf_name }}</p>
+                            <p class="text-gray-400">by {{ topturf.owner.fullname }}</p>
+                            <p class="mt-3 text-3xl font-bold text-white">{{ topturf.total_bookings }}<span class="text-base font-normal text-gray-500"> Bookings</span></p>
                         </div>
+                        {% else %}
+                        <p class="text-gray-400 text-center">No bookings yet.</p>
+                        {% endif %}
                     </div>
 
                     <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex-grow">
                         <h3 class="font-bold text-white mb-2">Highest Earning Turf</h3>
                         <p class="text-gray-400 text-sm mb-4">The turf that has generated the most revenue.</p>
+                        {% if turfearn and turfearn.total_revenue %}
                         <div class="text-center bg-gray-900 p-4 rounded-lg">
-                            <p class="text-blue-400 text-2xl font-bold">{% if highest_earning_turf %}{{ highest_earning_turf.name }}{% else %}Pro Soccer Field{% endif %}</p>
-                            <p class="text-gray-400">by {% if highest_earning_turf %}{{ highest_earning_turf.owner }}{% else %}Alice Smith{% endif %}</p>
-                            <p class="mt-3 text-3xl font-bold text-white">${% if highest_earning_turf %}{{ highest_earning_turf.revenue }}{% else %}4,800{% endif %} <span class="text-base font-normal text-gray-500">Revenue</span></p>
+                            <p class="text-blue-400 text-2xl font-bold">{{ turfearn.turf_name }}</p>
+                            <p class="text-gray-400">{{ turfearn.owner.fullname }}</p>
+                            <p class="mt-3 text-3xl font-bold text-white">${{ turfearn.total_revenue }}<span class="text-base font-normal text-gray-500">Revenue</span></p>
                         </div>
+                        {% else %}
+                        <p class="text-gray-400 text-center">No revenue data available.</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -103,7 +103,7 @@
                     </div>
                     <div>
                         <p class="text-gray-400 text-sm">Bookings Today</p>
-                        <p class="text-2xl font-bold text-white">12</p>
+                        <p class="text-2xl font-bold text-white">{{ bookings_today }}</p>
                     </div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-6">
@@ -112,7 +112,7 @@
                     </div>
                     <div>
                         <p class="text-gray-400 text-sm">Bookings This Week</p>
-                        <p class="text-2xl font-bold text-white">89</p>
+                        <p class="text-2xl font-bold text-white">{{ bookings_week }}</p>
                     </div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-6">
@@ -121,7 +121,7 @@
                     </div>
                     <div>
                         <p class="text-gray-400 text-sm">Bookings This Month</p>
-                        <p class="text-2xl font-bold text-white">350</p>
+                        <p class="text-2xl font-bold text-white">{{ bookings_month }}</p>
                     </div>
                 </div>
                 <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-6">
@@ -130,10 +130,11 @@
                     </div>
                     <div>
                         <p class="text-gray-400 text-sm">Total Cancellations</p>
-                        <p class="text-2xl font-bold text-white">21</p>
+                        <p class="text-2xl font-bold text-white">{{ total_cancellations }}</p>
                     </div>
                 </div>
             </div>
+
 
             <!-- All Bookings Table -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
@@ -151,55 +152,43 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Sample Row 1: Confirmed -->
+                            {% for booking in all_bookings %}
                             <tr class="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
-                                <td class="p-3">Alex Johnson</td>
-                                <td class="p-3">Urban Kickers</td>
-                                <td class="p-3 text-gray-400">Sep 06, 2025 - 05:00 PM</td>
-                                <td class="p-3"><span
-                                        class="bg-green-500/20 text-green-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Confirmed</span>
+                                <td class="p-3">{{ booking.user.fullname }}</td>
+                                <td class="p-3">{{ booking.turf.turf_name }}</td>
+                                <td class="p-3 text-gray-400">
+                                    {{ booking.booking_date|date:"M d, Y" }} - {{ booking.start_time|time:"h:i A" }}
                                 </td>
-                                <td class="p-3 text-gray-400">BKD98765</td>
+                                <td class="p-3">
+                                    {% if booking.status == "confirmed" %}
+                                        <span class="bg-green-500/20 text-green-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Confirmed</span>
+                                    {% elif booking.status == "pending" %}
+                                        <span class="bg-yellow-500/20 text-yellow-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Pending</span>
+                                    {% elif booking.status == "cancelled" %}
+                                        <span class="bg-red-500/20 text-red-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Cancelled</span>
+                                    {% elif booking.status == "completed" %}
+                                        <span class="bg-blue-500/20 text-blue-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Completed</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-3 text-gray-400">BKD{{ booking.id }}</td>
                                 <td class="p-3 text-right">
-                                    <button onclick="document.getElementById('cancelModal1').showModal()"
+                                    {% if booking.status in "pending confirmed" %}
+                                        <a href="#"
                                         class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/30">
-                                        Cancel
-                                    </button>
+                                            Cancel
+                                        </a>
+                                    {% else %}
+                                        <button class="bg-gray-600 text-gray-400 font-medium py-2 px-4 rounded-lg cursor-not-allowed" disabled>
+                                            Cancelled
+                                        </button>
+                                    {% endif %}
                                 </td>
                             </tr>
-                            <!-- Sample Row 2: Pending -->
-                            <tr class="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
-                                <td class="p-3">Maria Garcia</td>
-                                <td class="p-3">Goal Getters Field</td>
-                                <td class="p-3 text-gray-400">Sep 07, 2025 - 10:00 AM</td>
-                                <td class="p-3"><span
-                                        class="bg-yellow-500/20 text-yellow-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Pending</span>
-                                </td>
-                                <td class="p-3 text-gray-400">BKD11223</td>
-                                <td class="p-3 text-right">
-                                    <button onclick="document.getElementById('cancelModal2').showModal()"
-                                        class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/30">
-                                        Cancel
-                                    </button>
-                                </td>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="p-3 text-center text-gray-400">No bookings available</td>
                             </tr>
-                            <!-- Sample Row 3: Refunded/Cancelled -->
-                            <tr class="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
-                                <td class="p-3">Chen Wei</td>
-                                <td class="p-3">City Sports Dome</td>
-                                <td class="p-3 text-gray-400">Sep 05, 2025 - 02:00 PM</td>
-                                <td class="p-3"><span
-                                        class="bg-red-500/20 text-red-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Refunded</span>
-                                </td>
-                                <td class="p-3 text-gray-400">BKD33445</td>
-                                <td class="p-3 text-right">
-                                    <button
-                                        class="bg-gray-600 text-gray-400 font-medium py-2 px-4 rounded-lg cursor-not-allowed"
-                                        disabled>
-                                        Cancelled
-                                    </button>
-                                </td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>

@@ -94,7 +94,7 @@
               <div class="flex flex-col sm:flex-row items-center gap-6">
                 <!-- Profile Picture -->
                 <div class="relative group w-28 h-28 flex-shrink-0">
-                  <img id="profile-pic-preview" src="https://placehold.co/200x200/1f2937/a7f3d0?text={{ request.user.fullname|slice:':1' }}" alt="Profile Picture" class="w-full h-full rounded-full object-cover" />
+                  <img id="profile-pic-preview" src="https://placehold.co/200x200/1f2937/a7f3d0?text={{ request.user.fullname|slice:':1' }}" alt="Profile Picture" class="w-full h-full rounded-full object-cover border-2 border-green-400" />
                   <label for="profile-pic-input" class="profile-pic-upload opacity-0 absolute inset-0 bg-black/60 rounded-full flex items-center justify-center cursor-pointer"><i data-feather="camera" class="w-8 h-8 text-white"></i></label>
                   <input type="file" id="profile-pic-input" class="hidden" accept="image/*" />
                 </div>
