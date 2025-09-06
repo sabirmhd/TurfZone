@@ -238,6 +238,12 @@ def admindash(request):
         .first()
     )
 
+    total_revenue = (
+        TurfBooking.objects.filter(status__in=["confirmed", "completed"])
+        .aggregate(total=Sum("total_amount"))["total"] or 0
+    )
+
+
     context = {
         'turfpending' : turfpending,
         'turfapproved': turfapproved,
@@ -245,6 +251,7 @@ def admindash(request):
         "owners": owners,
         "topturf": topturf,
         "turfearn": turfearn,
+        "total_revenue": total_revenue,
     }
     if request.user.role == 'admin':
         return render(request, 'admindash.html',context)
@@ -919,6 +926,8 @@ def edit_turf(request, turf_id):
         turf.turf_name = request.POST.get("turf_name")
         turf.description = request.POST.get("description")
         turf.price_per_hour = request.POST.get("price_per_hour")
+        turf.opening_time = request.POST.get("opening_time")
+        turf.closing_time = request.POST.get("closing_time")
 
         if request.FILES.get("image1"):
             turf.image1 = request.FILES["image1"]
@@ -970,3 +979,34 @@ def managebookings(request):
 def managepayments(request):
 
     return render(request, 'managepayments.html')
+
+
+def update_turf(request, turf_id):
+    # Ensure the request is a POST request
+    if request.method == 'POST':
+        # Get the specific turf instance or return a 404 error if not found
+        turf = get_object_or_404(Turf, pk=turf_id)
+
+        # Update turf fields from the form data
+        turf.turf_name = request.POST.get('turf_name')
+        turf.price_per_hour = request.POST.get('price_per_hour')
+        turf.opening_time = request.POST.get('opening_time')
+        turf.closing_time = request.POST.get('closing_time')
+        turf.description = request.POST.get('description')
+
+        # Handle the image upload
+        # request.FILES will contain the uploaded file data
+        if 'image1' in request.FILES:
+            turf.image1 = request.FILES['image1']
+        
+        # Save the updated turf object to the database
+        turf.save()
+
+        # Add a success message to be displayed on the next page
+        messages.success(request, f"'{turf.turf_name}' has been updated successfully!")
+
+        # Redirect back to the manage turfs page
+        return redirect('manageturf') # Make sure 'manageturf' is the correct name of your url pattern
+
+    # If not a POST request, just redirect back
+    return redirect('manageturf')

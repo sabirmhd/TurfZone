@@ -226,6 +226,18 @@
                                         <input type="number" id="edit-turf-price" name="price_per_hour" step="0.01" required
                                             class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                     </div>
+
+                                    <div class="mb-4">
+                                        <label for="edit-opening-time" class="block text-sm font-medium text-gray-300">Opening Time</label>
+                                        <input type="time" id="edit-opening-time" name="opening_time" value="{{ turf.opening_time|time:'H:i' }}" required
+                                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="edit-closing-time" class="block text-sm font-medium text-gray-300">Closing Time</label>
+                                        <input type="time" id="edit-closing-time" name="closing_time" value="{{ turf.closing_time|time:'H:i' }}" required
+                                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
                                     
                                     <div class="mb-6">
                                         <label for="edit-turf-image" class="block text-sm font-medium text-gray-300">Update Image (Optional)</label>
@@ -449,6 +461,8 @@
             const turfNameInput = document.getElementById('edit-turf-name');
             const turfDescriptionInput = document.getElementById('edit-turf-description');
             const turfPriceInput = document.getElementById('edit-turf-price');
+            const openingtimeInput = document.getElementById('edit-opening-time');
+            const closingtimeInput = document.getElementById('edit-closing-time');
 
             function openEditModal(button) {
                 // Get data from the button's data-* attributes
@@ -456,6 +470,8 @@
                 const turfName = button.dataset.turfName;
                 const turfDescription = button.dataset.turfDescription;
                 const turfPrice = button.dataset.turfPrice;
+                const turfOpeningtime = button.dataset.turfOpeningtime;
+                const turfClosingtime = button.dataset.turfClosingtime;
 
                 // Set the form's action URL dynamically
                 editForm.action = `/edit_turf/${turfId}/`;
@@ -464,6 +480,8 @@
                 turfNameInput.value = turfName;
                 turfDescriptionInput.value = turfDescription;
                 turfPriceInput.value = turfPrice;
+                openingtimeInput.value = openingtimeInput;
+                closingtimeInput.value = closingtimeInput;
 
                 // Show the modal
                 modal.classList.remove('hidden');

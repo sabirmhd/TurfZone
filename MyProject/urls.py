@@ -74,5 +74,6 @@ urlpatterns = [
     path("edit_turf/<int:turf_id>/", views.edit_turf, name="edit_turf"),
     path('managebookings', views.managebookings, name='managebookings'),
     path('managepayments', views.managepayments, name='managepayments'),
+    path('manage/turf/update/<int:turf_id>/', views.update_turf, name='update_turf'),
 
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT )
