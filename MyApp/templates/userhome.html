@@ -144,9 +144,9 @@
             <div class="container mx-auto px-4">
                 <h2 class="text-3xl font-bold text-white mb-8 text-center">Available Turfs</h2>
                 <div id="turf-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {% for turf in turfs|slice:":6" %}
+                    {% for turf in turfs %}
                     <div
-                        class="bg-gray-800 rounded-xl overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                        class="bg-gray-800 rounded-xl overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 {% if forloop.counter > 6 %}hidden turf-hidden{% endif %}">
                         <img src="{{ turf.image1.url }}" alt="{{ turf.turf_name }}" class="w-full h-48 object-cover">
                         <div class="p-5">
                             <h3 class="text-xl font-bold text-white">{{ turf.turf_name }}</h3>
@@ -172,6 +172,16 @@
                     </div>
                     {% endfor %}
                 </div>
+            {% if turfs|length > 6 %}
+            <div class="mt-12 flex justify-center">
+                <button id="view-more-btn"
+                    class="flex items-center justify-center gap-2 bg-transparent border-2 border-green-500 text-green-400 font-bold py-3 px-8 rounded-full hover:bg-green-500 hover:text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75">
+                    <span id="view-more-text">View More</span>
+                    <i data-feather="chevron-down" class="chevron-down-icon transition-transform duration-300"></i>
+                    <i data-feather="chevron-up" class="chevron-up-icon hidden transition-transform duration-300"></i>
+                </button>
+            </div>
+            {% endif %}           
             </div>
         </section>
 
@@ -203,14 +213,8 @@
         </div>
     </footer>
 
-    <!-- Booking Modal -->
-    <!-- <div id="booking-modal" class="modal hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-        <div class="bg-gray-900 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 relative"
-            onclick="event.stopPropagation()"> -->
-    <!-- Modal content will be injected here -->
-    <!-- </div>
-    </div> -->
 
+    
 <!-- Hidden Review Modal -->
 <div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
     <div class="bg-gray-900 rounded-xl p-6 w-full max-w-lg">
@@ -264,148 +268,108 @@
 
 
 
-    <script>
-        // --- DOM Elements ---
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
         const upcomingBookingsContainer = document.getElementById('upcoming-bookings');
         const pastBookingsContainer = document.getElementById('past-bookings');
+        const reviewModal = document.getElementById("reviewModal");
+        const closeModalBtn = document.getElementById("closeReviewModal");
+        const reviewForm = document.getElementById("reviewForm");
 
         // --- Renders the booking lists into the correct divs ---
         function renderBookings() {
-            // Upcoming Bookings (Rendered by Django Template)
+            // Upcoming Bookings
             upcomingBookingsContainer.innerHTML = `
-            {% for books in upcoming_bookings %}
-            <div class="bg-gray-900 p-4 rounded-lg flex flex-col md:flex-row items-center gap-5">
-                <img src="{{ books.turf.image1.url }}" alt="{{ books.turf.turf_name }}" class="w-full h-32 md:w-32 md:h-24 rounded-md object-cover">
-                <div class="flex-grow text-center md:text-left">
-                    <h4 class="font-bold text-lg text-white">{{ books.turf.turf_name }}</h4>
-                    <p class="text-sm text-gray-400">{{ books.turf.city }}, {{ books.turf.state }}</p>
-                    <p class="text-sm text-gray-400 mt-1">
-                        <i data-feather="calendar" class="inline w-4 h-4 mr-1"></i>{{ books.booking_date }} at {{ books.start_time }}
-                    </p>
-                </div>
-                <div class="flex flex-col items-center md:items-end gap-3 mt-3 md:mt-0">
-                    <span class="font-bold text-xl text-green-400">₹{{ books.total_amount }}</span>
-                    <div class="flex items-center gap-3">
-                        <a href="{% url 'view_invoice' books.id %}" target="_blank" class="text-sm text-blue-400 hover:text-blue-300 font-semibold">View Receipt</a>
-                        <button class="text-sm text-red-500 hover:text-red-400 font-semibold">Cancel</button>
+                {% for books in upcoming_bookings %}
+                <div class="bg-gray-900 p-4 rounded-lg flex flex-col md:flex-row items-center gap-5">
+                    <img src="{{ books.turf.image1.url }}" alt="{{ books.turf.turf_name }}" class="w-full h-32 md:w-32 md:h-24 rounded-md object-cover">
+                    <div class="flex-grow text-center md:text-left">
+                        <h4 class="font-bold text-lg text-white">{{ books.turf.turf_name }}</h4>
+                        <p class="text-sm text-gray-400">{{ books.turf.city }}, {{ books.turf.state }}</p>
+                        <p class="text-sm text-gray-400 mt-1"><i data-feather="calendar" class="inline w-4 h-4 mr-1"></i>{{ books.booking_date }} at {{ books.start_time }}</p>
+                    </div>
+                    <div class="flex flex-col items-center md:items-end gap-3 mt-3 md:mt-0">
+                        <span class="font-bold text-xl text-green-400">₹{{ books.total_amount }}</span>
+                        <div class="flex items-center gap-3">
+                            <a href="{% url 'view_invoice' books.id %}" target="_blank" class="text-sm text-blue-400 hover:text-blue-300 font-semibold">View Receipt</a>
+                            <button class="text-sm text-red-500 hover:text-red-400 font-semibold">Cancel</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            {% empty %}
-            <p class="text-gray-400 text-center">No upcoming bookings</p>
-            {% endfor %}
-        `;
+                {% empty %}
+                <p class="text-gray-400 text-center">No upcoming bookings</p>
+                {% endfor %}
+            `;
 
-            // Past Bookings (Rendered by Django Template)
+            // Past Bookings
             pastBookingsContainer.innerHTML = `
-            {% for books in past_bookings %}
-            <div class="bg-gray-900 p-4 rounded-lg flex flex-col md:flex-row items-center gap-5">
-                <img src="{{ books.turf.image1.url }}" alt="{{ books.turf.turf_name }}" class="w-full h-32 md:w-32 md:h-24 rounded-md object-cover opacity-70">
-                <div class="flex-grow text-center md:text-left">
-                    <h4 class="font-bold text-lg text-white">{{ books.turf.turf_name }}</h4>
-                    <p class="text-sm text-gray-400">{{ books.turf.city }}, {{ books.turf.state }}</p>
-                    <p class="text-sm text-gray-400 mt-1">
-                        <i data-feather="calendar" class="inline w-4 h-4 mr-1"></i>{{ books.booking_date }} at {{ books.start_time }}
-                    </p>
-                </div>
-                <div class="flex flex-col items-center md:items-end gap-3 mt-3 md:mt-0">
-                    <span class="font-bold text-xl text-gray-400">₹{{ books.total_amount }}</span>
-                    <div class="flex items-center gap-3">
-                        {% if books.reviewed %}
-                            <span class="text-sm text-green-500 font-semibold flex items-center gap-1">
-                                <i data-feather="check-circle" class="w-4 h-4"></i>Reviewed
-                            </span>
-                        {% else %}
-                            <button 
-                            class="text-sm text-yellow-500 hover:text-yellow-400 font-semibold review-btn" 
-                            data-turf-id="{{ books.turf.id }}">
-                            Rate & Review
-                            </button>
-                        {% endif %}
+                {% for books in past_bookings %}
+                <div class="bg-gray-900 p-4 rounded-lg flex flex-col md:flex-row items-center gap-5">
+                    <img src="{{ books.turf.image1.url }}" alt="{{ books.turf.turf_name }}" class="w-full h-32 md:w-32 md:h-24 rounded-md object-cover opacity-70">
+                    <div class="flex-grow text-center md:text-left">
+                        <h4 class="font-bold text-lg text-white">{{ books.turf.turf_name }}</h4>
+                        <p class="text-sm text-gray-400">{{ books.turf.city }}, {{ books.turf.state }}</p>
+                        <p class="text-sm text-gray-400 mt-1"><i data-feather="calendar" class="inline w-4 h-4 mr-1"></i>{{ books.booking_date }} at {{ books.start_time }}</p>
+                    </div>
+                    <div class="flex flex-col items-center md:items-end gap-3 mt-3 md:mt-0">
+                        <span class="font-bold text-xl text-gray-400">₹{{ books.total_amount }}</span>
+                        <div class="flex items-center gap-3">
+                            {% if books.reviewed %}
+                                <span class="text-sm text-green-500 font-semibold flex items-center gap-1">
+                                    <i data-feather="check-circle" class="w-4 h-4"></i>Reviewed
+                                </span>
+                            {% else %}
+                                <button class="text-sm text-yellow-500 hover:text-yellow-400 font-semibold review-btn" data-turf-id="{{ books.turf.id }}">
+                                    Rate & Review
+                                </button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-            {% empty %}
-            <p class="text-gray-400 text-center">No past bookings</p>
-            {% endfor %}
-        `;
+                {% empty %}
+                <p class="text-gray-400 text-center">No past bookings</p>
+                {% endfor %}
+            `;
 
-            // Feather Icons refresh
+            // Refresh Feather Icons
             if (typeof feather !== 'undefined') {
                 feather.replace();
             }
         }
-
-        // --- Handles the logic for switching between tabs ---
-        function showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
-            document.getElementById(`${tabName}-bookings`).classList.remove('hidden');
-            document.querySelectorAll('.tab-btn').forEach(button => {
-                button.classList.remove('active-tab', 'text-green-400', 'border-green-400');
-                button.classList.add('text-gray-400');
-            });
-            const activeButton = document.querySelector(`.tab-btn[onclick="showTab('${tabName}')"]`);
-            activeButton.classList.add('active-tab', 'text-green-400', 'border-green-400');
-            activeButton.classList.remove('text-gray-400');
-        }
-
-        // --- Initial Load ---
-        document.addEventListener('DOMContentLoaded', () => {
-            renderBookings();
+        
+        // **FIXED LOGIC**: Use Event Delegation for the review button
+        document.body.addEventListener('click', function(event) {
+            // Check if the clicked element is a review button
+            if (event.target.classList.contains('review-btn')) {
+                const turfId = event.target.getAttribute("data-turf-id");
+                
+                // Dynamically set form action
+                reviewForm.action = `/turf/${turfId}/review/`;
+                
+                reviewModal.classList.remove("hidden");
+            }
+        });
+        
+        // Close modal
+        closeModalBtn.addEventListener("click", () => {
+            reviewModal.classList.add("hidden");
         });
 
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const reviewModal = document.getElementById("reviewModal");
-            const closeModalBtn = document.getElementById("closeReviewModal");
-            const reviewForm = document.getElementById("reviewForm");
-
-            // Open modal when "Rate & Review" is clicked
-            document.querySelectorAll(".review-btn").forEach(button => {
-                button.addEventListener("click", () => {
-                    const turfId = button.getAttribute("data-turf-id");
-                    
-                    // dynamically set form action to match your Django path
-                    reviewForm.action = `/turf/${turfId}/review/`;
-                    
-                    reviewModal.classList.remove("hidden");
-                });
-            });
-
-            // Close modal
-            closeModalBtn.addEventListener("click", () => {
-                reviewModal.classList.add("hidden");
-            });
-        });
-
-        document.addEventListener("DOMContentLoaded", function () {
+        // --- Star Rating Logic ---
         const stars = document.querySelectorAll("#star-rating label i");
         const inputs = document.querySelectorAll("#star-rating input");
         let selectedRating = 0;
 
         stars.forEach((star, index) => {
-            const input = inputs[inputs.length - 1 - index]; 
+            const input = inputs[inputs.length - 1 - index];
             const ratingValue = parseInt(input.value);
 
-            // Hover effect
-            star.parentElement.addEventListener("mouseenter", () => {
-                highlightStars(ratingValue);
-            });
-
-            star.parentElement.addEventListener("mouseleave", () => {
-                highlightStars(selectedRating);
-            });
-
-            // Click (select/unselect)
+            star.parentElement.addEventListener("mouseenter", () => highlightStars(ratingValue));
+            star.parentElement.addEventListener("mouseleave", () => highlightStars(selectedRating));
             star.parentElement.addEventListener("click", (e) => {
-                e.preventDefault(); 
-                if (selectedRating === ratingValue) {
-                    selectedRating = 0;
-                    input.checked = false;
-                } else {
-                    selectedRating = ratingValue;
-                    input.checked = true;
-                }
+                e.preventDefault();
+                selectedRating = (selectedRating === ratingValue) ? 0 : ratingValue;
+                input.checked = selectedRating === ratingValue;
                 highlightStars(selectedRating);
             });
         });
@@ -422,9 +386,47 @@
                 }
             });
         }
+
+        // --- Toggle "View More" Turfs Logic ---
+        const viewMoreBtn = document.getElementById('view-more-btn');
+        if (viewMoreBtn) {
+            const btnText = document.getElementById('view-more-text');
+            const downIcon = viewMoreBtn.querySelector('.chevron-down-icon');
+            const upIcon = viewMoreBtn.querySelector('.chevron-up-icon');
+
+            viewMoreBtn.addEventListener('click', () => {
+                const extraTurfs = document.querySelectorAll('.turf-hidden');
+                const isShowingMore = btnText.textContent.trim() === 'View Less';
+                
+                extraTurfs.forEach(turf => turf.classList.toggle('hidden'));
+                
+                btnText.textContent = isShowingMore ? 'View More' : 'View Less';
+                downIcon.classList.toggle('hidden', !isShowingMore);
+                upIcon.classList.toggle('hidden', isShowingMore);
+                
+                if (isShowingMore) {
+                    document.getElementById('browse').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
+        
+        // --- Initial Load ---
+        renderBookings();
     });
 
-    </script>
+    // --- Handles the logic for switching between tabs (can stay outside DOMContentLoaded) ---
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+        document.getElementById(`${tabName}-bookings`).classList.remove('hidden');
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.classList.remove('active-tab', 'text-green-400', 'border-green-400');
+            button.classList.add('text-gray-400');
+        });
+        const activeButton = document.querySelector(`.tab-btn[onclick="showTab('${tabName}')"]`);
+        activeButton.classList.add('active-tab', 'text-green-400', 'border-green-400');
+        activeButton.classList.remove('text-gray-400');
+    }
+</script>
     {% include "message.html" with position="top-14 left-1/2 -translate-x-1/2" %}
 </body>
 

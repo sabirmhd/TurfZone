@@ -978,7 +978,16 @@ def managebookings(request):
 
 def managepayments(request):
 
-    return render(request, 'managepayments.html')
+    total_revenue = (
+        TurfBooking.objects.filter(status__in=["confirmed", "completed"])
+        .aggregate(total=Sum("total_amount"))["total"] or 0
+    )
+
+    context = {
+        "total_revenue":total_revenue
+    }
+
+    return render(request, 'managepayments.html',context)
 
 
 def update_turf(request, turf_id):
