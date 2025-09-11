@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Payment - TurfZone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .turf-bg {
+            /* Assumes the booking object with its related turf is passed to the template */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ booking.turf.image.url }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+    </style>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white">
+
+    <div class="min-h-screen turf-bg flex items-center justify-center p-4">
+
+        <div class="bg-gray-800 bg-opacity-80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 max-w-md w-full">
+            <div class="text-center mb-6">
+                <i class="fas fa-shield-alt text-green-400 text-6xl"></i>
+            </div>
+
+            <h2 class="text-3xl font-bold text-center text-green-400 mb-2">Confirm Your Booking</h2>
+            <p class="text-center text-gray-400 mb-8">Review the details and complete your payment.</p>
+
+            <div class="space-y-4 text-lg mb-8">
+                <div class="flex justify-between items-center bg-gray-700 bg-opacity-50 p-3 rounded-lg">
+                    <span class="font-semibold text-gray-300">Turf:</span>
+                    <span class="text-white font-medium">{{ booking.turf.turf_name }}</span>
+                </div>
+                <div class="flex justify-between items-center bg-gray-700 bg-opacity-50 p-3 rounded-lg">
+                    <span class="font-semibold text-gray-300">Date:</span>
+                    <span class="text-white font-medium">{{ booking_date }}</span>
+                </div>
+                <div class="flex justify-between items-center bg-gray-700 bg-opacity-50 p-3 rounded-lg">
+                    <span class="font-semibold text-gray-300">Slot:</span>
+                    <span class="text-white font-medium">{{ start_time|time:"h:i A" }} - {{ end_time|time:"h:i A" }}</span>
+                </div>
+            </div>
+
+            <div class="py-6 border-t border-b border-gray-700 mb-8">
+                <div class="flex justify-between items-center text-2xl font-bold">
+                    <span class="text-gray-300">Total to Pay:</span>
+                    <span class="text-green-400">₹{{ amount|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <button id="payBtn"
+                    class="w-full bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-4 rounded-lg text-lg transition duration-300 shadow-lg hover:shadow-green-500/50 flex items-center justify-center space-x-2">
+                <i class="fas fa-lock"></i>
+                <span>Pay Securely</span>
+            </button>
+        </div>
+
+    </div>
+    
+    <form id="paymentForm" action="{% url 'payment_success' %}" method="POST" class="hidden">
+        {% csrf_token %}
+        <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+        <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+        <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+        <input type="hidden" name="booking_id" value="{{ booking.id }}">
+    </form>
+
+    <script>
+        document.getElementById('payBtn').onclick = function (e) {
+            var options = {
+                "key": "{{ razorpay_key }}",
+                "amount": "{{ amount_in_paise }}", // Amount in paise
+                "currency": "INR",
+                "name": "{{ booking.turf.turf_name }}",
+                "description": "Turf Booking Payment",
+                "order_id": "{{ razorpay_order_id }}",
+                "handler": function (response) {
+                    document.getElementById("razorpay_payment_id").value = response.razorpay_payment_id;
+                    document.getElementById("razorpay_order_id").value = response.razorpay_order_id;
+                    document.getElementById("razorpay_signature").value = response.razorpay_signature;
+                    document.getElementById("paymentForm").submit();
+                },
+                "prefill": {
+                    "name": "{{ request.user.fullname }}",
+                    "email": "{{ request.user.email }}",
+                    "contact": "{{ request.user.phone_number }}"
+                },
+                "theme": {
+                    "color": "#22c55e"
+                }
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+            e.preventDefault();
+        }
+    </script>
+</body>
+
+</html>

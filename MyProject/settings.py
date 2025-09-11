@@ -136,3 +136,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "sabirmhd30@gmail.com"
 EMAIL_HOST_PASSWORD = "sjdvadexszigrpop"  # not your normal password
 DEFAULT_FROM_EMAIL = "TurfZone <sabirmhd30@gmail.com>"
+RAZORPAY_KEY_ID ="rzp_test_RFRn81LF4xVnHS"
+RAZORPAY_KEY_SECRET ="2bvLFyTjYmPj4oOvY9CXo9T3"
+

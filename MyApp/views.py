@@ -22,7 +22,12 @@ from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.pagesizes import letter
 from django.db.models.functions import TruncMonth
 import json
+import razorpay
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
+
+razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 User = get_user_model()
 
@@ -334,70 +339,205 @@ def reject_turf(request, turf_id):
     return redirect('turfreq')
 
 
-def booking(request,id):
+# def booking(request,id):
 
-    turf=Turf.objects.get(id=id)
-    user_id = request.user
+#     turf=Turf.objects.get(id=id)
+#     user_id = request.user
+#     if request.method == "POST":
+#         turf_id = request.POST.get("turf")
+#         booking_date = request.POST.get("date")
+#         start_time = request.POST.get("start_time")
+#         duration = Decimal(request.POST.get("duration"))
+#         start_dt = datetime.strptime(start_time, "%H:%M")
+
+#         # Add duration
+#         end_dt = start_dt + timedelta(hours=int(duration))
+
+#         # Extract end_time in same format
+#         end_time = end_dt.strftime("%H:%M")
+#         bookings = TurfBooking.objects.filter(turf=turf_id, booking_date=booking_date)
+#         start_time_t = datetime.strptime(start_time, "%H:%M")
+#         end_time_t = datetime.strptime(end_time, "%H:%M")
+        
+#         now = datetime.now()
+#         current_time = datetime.strptime(now.strftime("%H:%M"), "%H:%M")
+        
+#         today = date.today()
+#         booking_date_time = datetime.strptime(booking_date, "%Y-%m-%d").date()
+
+#         if booking_date_time < today:
+#             messages.error(request, "Cannot book in the past.")
+#             return render(request,"booking.html")
+        
+#         if booking_date_time == today:
+#             if start_time_t < current_time:
+#                 messages.error(request, "Start time is in the past.")
+#                 return render(request,"booking.html")
+                
+#         for book in bookings:
+#             if start_time_t.time()<turf.opening_time or end_time_t.time()>turf.closing_time:
+#                 messages.error(request, "Booking is outside turf operating hours.")
+#                 return render(request,"turf_booking.html",{"turf": turf})
+            
+#             if start_time_t.time() < book.end_time and end_time_t.time() > book.start_time:
+#                  messages.error(request, "Time slot overlaps with an existing booking.")
+#                  return render(request,"booking.html",{"turf": turf})
+#         TurfBooking.objects.create(user=user_id,turf=turf,start_time=start_time,booking_date=booking_date,end_time=end_time,total_amount=turf.price_per_hour * duration)
+#         messages.success(request, "Booking successful!")
+#         return redirect('userhome')
+    
+#     average_rating = turf.reviews.aggregate(avg=Avg("rating"))["avg"]
+#     reviews_count = turf.reviews.aggregate(count=Count("id"))["count"]
+#     has_booked = TurfBooking.objects.filter(user=request.user, turf=turf).exists()
+
+#     context = {
+#         'turf':turf,
+#         "average_rating": round(average_rating) if average_rating else None,
+#         "reviews_count": reviews_count,
+#         "has_booked": has_booked
+#     }
+                
+#     return render(request,"booking.html", context)
+
+
+
+
+
+def booking(request, id):
+    turf = Turf.objects.get(id=id)
+    user = request.user
+
     if request.method == "POST":
         turf_id = request.POST.get("turf")
         booking_date = request.POST.get("date")
         start_time = request.POST.get("start_time")
         duration = Decimal(request.POST.get("duration"))
         start_dt = datetime.strptime(start_time, "%H:%M")
-
-        # Add duration
         end_dt = start_dt + timedelta(hours=int(duration))
 
-        # Extract end_time in same format
         end_time = end_dt.strftime("%H:%M")
         bookings = TurfBooking.objects.filter(turf=turf_id, booking_date=booking_date)
         start_time_t = datetime.strptime(start_time, "%H:%M")
         end_time_t = datetime.strptime(end_time, "%H:%M")
-        
-        now = datetime.now()
-        current_time = datetime.strptime(now.strftime("%H:%M"), "%H:%M")
-        
+
         today = date.today()
         booking_date_time = datetime.strptime(booking_date, "%Y-%m-%d").date()
+        now = datetime.now()
+        current_time = datetime.strptime(now.strftime("%H:%M"), "%H:%M")
+
         if booking_date_time < today:
             messages.error(request, "Cannot book in the past.")
-            return render(request,"booking.html")
+            return render(request, "booking.html", {"turf": turf})
+        
+        if start_time_t.time() < turf.opening_time:
+            messages.error(request, f"Turf opens at {turf.opening_time.strftime('%H:%M')}. Please select a valid time.")
+            return render(request, "booking.html", {"turf": turf})
+
+        if end_time_t.time() > turf.closing_time:
+            messages.error(request, f"Turf closes at {turf.closing_time.strftime('%H:%M')}. Please select a valid time.")
+            return render(request, "booking.html", {"turf": turf})
         
         if booking_date_time == today:
             if start_time_t < current_time:
                 messages.error(request, "Start time is in the past.")
-                return render(request,"booking.html")
-                
+                return render(request, "booking.html", {"turf": turf})
+
         for book in bookings:
-            if start_time_t.time()<turf.opening_time or end_time_t.time()>turf.closing_time:
-                messages.error(request, "Booking is outside turf operating hours.")
-                return render(request,"turf_booking.html",{"turf": turf})
-            
+            if start_time_t.time() < turf.opening_time or end_time_t.time() > turf.closing_time:
+                messages.error(request, "Booking outside turf operating hours.")
+                return render(request, "booking.html", {"turf": turf})
+
             if start_time_t.time() < book.end_time and end_time_t.time() > book.start_time:
-                 messages.error(request, "Time slot overlaps with an existing booking.")
-                 return render(request,"booking.html",{"turf": turf})
-        TurfBooking.objects.create(user=user_id,turf=turf,start_time=start_time,booking_date=booking_date,end_time=end_time,total_amount=turf.price_per_hour * duration)
-        messages.success(request, "Booking successful!")
-        return redirect('userhome')
-    
+                messages.error(request, "Time slot overlaps with an existing booking.")
+                return render(request, "booking.html", {"turf": turf})
+
+        total_amount = turf.price_per_hour * duration
+
+        # ✅ Create Razorpay Order
+        razorpay_order = razorpay_client.order.create({
+            "amount": int(total_amount * 100),  # amount in paisa
+            "currency": "INR",
+            "payment_capture": "1"
+        })
+
+        # Create booking with status pending
+        booking = TurfBooking.objects.create(
+            user=user,
+            turf=turf,
+            start_time=start_time_t,
+            booking_date=booking_date_time,
+            end_time=end_time_t,
+            total_amount=total_amount,
+            status="pending"
+        )
+
+        context = {
+            "turf": turf,
+            "booking": booking,
+            "razorpay_order_id": razorpay_order["id"],
+            "razorpay_key": settings.RAZORPAY_KEY_ID,
+            "amount": int(total_amount),
+            "currency": "INR",
+            "booking_date": booking.booking_date,
+            "start_time": booking.start_time,
+            "end_time": booking.end_time,
+            
+        }
+        return render(request, "payment.html", context)
+
+    # GET Request
     average_rating = turf.reviews.aggregate(avg=Avg("rating"))["avg"]
     reviews_count = turf.reviews.aggregate(count=Count("id"))["count"]
     has_booked = TurfBooking.objects.filter(user=request.user, turf=turf).exists()
 
     context = {
-        'turf':turf,
+        "turf": turf,
         "average_rating": round(average_rating) if average_rating else None,
         "reviews_count": reviews_count,
         "has_booked": has_booked
     }
-                
-    return render(request,"booking.html", context)
+    return render(request, "booking.html", context)
+
+
+@csrf_exempt
+def payment_success(request):
+    if request.method == "POST":
+        payment_id = request.POST.get("razorpay_payment_id")
+        order_id = request.POST.get("razorpay_order_id")
+        signature = request.POST.get("razorpay_signature")
+        booking_id = request.POST.get("booking_id")
+
+        booking = TurfBooking.objects.get(id=booking_id)
+
+        try:
+            # Verify payment signature
+            razorpay_client.utility.verify_payment_signature({
+                "razorpay_payment_id": payment_id,
+                "razorpay_order_id": order_id,
+                "razorpay_signature": signature
+            })
+
+            booking.status = "confirmed"
+            booking.save()
+            messages.success(request, "Payment Successful! Booking confirmed.")
+            return redirect("userhome")
+
+        except:
+            booking.status = "cancelled"
+            booking.save()
+            messages.error(request, "Payment verification failed.")
+            return redirect("userhome")
 
 
 def listbooking(request):
-    user_id=request.user.id
-    bookings=TurfBooking.objects.filter(user_id=user_id).select_related('turf')
-    return render(request,'listbooking.html',{'bookings':bookings})
+    user_id = request.user.id
+    bookings = (
+        TurfBooking.objects.filter(user_id=user_id)
+        .select_related('turf')
+        .order_by('-id')   # latest first
+    )
+    return render(request, 'listbooking.html', {'bookings': bookings})
+
 
 def manageusers(request):
     allusers = User.objects.all()
