@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurfZone - Login</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles to apply the Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: url("../../media/login_turf.png") no-repeat center / cover;
+            /* background-size: cover;
+            background-position: center; */
+        }
+
+        /* Custom radio button styling */
+        .custom-radio:checked {
+            background-color: #34D399;
+            /* Green-400 */
+        }
+
+        .custom-radio:checked+label {
+            border-color: #34D399;
+            /* Green-400 */
+            color: #F9FAFB;
+            /* Gray-50 */
+        }
+    </style>
+</head>
+
+<body class="relative bg-gray-900 text-white">
+    <div class="absolute z-10 w-full min-h-screen bg-gradient-to-b from-[#00000038] to-[#000000b4]"></div>
+
+    <!-- Main Content -->
+    <div class="relative z-40 flex flex-col items-center justify-center min-h-screen px-4 py-8">
+
+        <!-- Logo -->
+        <h2 class="text-4xl md:text-5xl font-bold text-white tracking-tight"><span
+                class="text-green-400">Turf</span>Zone</h2>
+
+        <!-- Login/Sign-up Form Container -->
+        <div class="w-full max-w-md bg-gray-800/70 backdrop-blur-lg rounded-2xl p-8 shadow-2xl">
+
+            <!-- Form Title -->
+            <h2 id="form-title" class="text-2xl font-bold text-center mb-2">Login to Your Account</h2>
+            <p class="text-gray-400 text-center mb-8">Let's get you back on field!</p>
+
+            <!-- Sign Up Form -->
+            <form id="signup-form" method="POST" class="space-y-6" action="">
+                {% csrf_token %}
+                <!-- Email Input -->
+                <div>
+                    <label for="signup-email" class="text-sm font-medium text-gray-300">Email</label>
+                    <input type="email" id="signup-email" name="email" placeholder="you@example.com"
+                        class="mt-1 w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition">
+                </div>
+
+                <!-- Password Input -->
+                <div>
+                      <label for="signup-password" class="text-sm font-medium text-gray-300">Password</label>
+                        <div class="relative mt-1">
+                            <input
+                            type="password"
+                            id="signup-password"
+                            name="password"
+                            placeholder="••••••••"
+                            class="w-full p-3 pr-12 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition"/>
+
+                            <!-- Eye Icon (centered vertically, pinned right) -->
+                        <button type="button" id="togglePassword"
+                            class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-green-400 focus:outline-none" disabled>
+                            <i data-feather="eye"></i>
+                        </button>
+                        </div>
+                        <a href="{% url 'password_reset' %}" id="toggle-link" class="mt-2 block font-medium  text-sm text-right text-green-400 text-center hover:underline">Forgot Password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit"
+                        class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105">Log
+                        In</button>
+                </div>
+            </form>
+            <!-- Sign Up -->
+            <p class="text-center text-gray-400 mt-8">
+                <span id="toggle-text">Don't have an account?</span>
+                <a href="{% url 'register' %}" id="toggle-link"
+                    class="font-medium text-green-400 hover:underline">Register</a>
+            </p>
+        </div>
+    </div>
+
+    {% include "message.html" %}
+
+</body>
+<script>
+        feather.replace(); // render feather icons
+
+        const passwordInput = document.getElementById("signup-password");
+        const togglePassword = document.getElementById("togglePassword");
+
+        // Enable eye icon only when there's input
+        passwordInput.addEventListener("input", () => {
+            if (passwordInput.value.length > 0) {
+            togglePassword.removeAttribute("disabled");
+            togglePassword.classList.remove("cursor-not-allowed", "text-gray-500");
+            togglePassword.classList.add("cursor-pointer", "text-gray-400", "hover:text-green-400");
+            } else {
+            togglePassword.setAttribute("disabled", true);
+            togglePassword.classList.remove("cursor-pointer", "text-gray-400", "hover:text-green-400");
+            togglePassword.classList.add("cursor-not-allowed", "text-gray-500");
+            passwordInput.setAttribute("type", "password"); // always hide again if cleared
+            togglePassword.innerHTML = feather.icons["eye"].toSvg();
+            }
+        });
+
+        // Toggle show/hide password when enabled
+        togglePassword.addEventListener("click", function () {
+            if (this.disabled) return;
+
+            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+            passwordInput.setAttribute("type", type);
+
+            // Change icon based on state
+            this.innerHTML = type === "password"
+            ? feather.icons["eye"].toSvg()
+            : feather.icons["eye-off"].toSvg();
+        });
+</script>
+
+</html>

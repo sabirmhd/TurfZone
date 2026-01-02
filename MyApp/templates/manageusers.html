@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurfZone - Manage Users</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles to integrate with Tailwind */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #111827;
+            /* bg-gray-900 */
+        }
+
+        /* Custom scrollbar for a better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+            /* bg-gray-800 */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            /* indigo-600 */
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4338ca;
+            /* indigo-700 */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-200">
+
+    <div class="flex h-screen">
+        <aside class="w-64 flex-shrink-0 bg-gray-800 p-6 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-3 mb-10">
+                    <i class="fas fa-futbol text-green-400 text-3xl"></i>
+                    <h1 class="text-2xl font-bold text-white">TurfZone</h1>
+                </div>
+                <nav class="flex flex-col gap-4">
+                    <a href="{% url 'admindash' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-tachometer-alt w-6 text-center"></i>
+                        <span class="font-semibold">Dashboard</span>
+                    </a>
+                    <a href="{% url 'manageusers' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg bg-gray-900 text-white shadow-md">
+                        <i class="fas fa-users w-6 text-center text-green-400"></i>
+                        <span>Manage Users</span>
+                    </a>
+                    <a href="{% url 'turfreq' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-file-signature w-6 text-center"></i>
+                        <span>Turf Requests</span>
+                    </a>
+                    <a href="{% url 'manageturf' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-layer-group w-6 text-center"></i>
+                        <span>Manage Turfs</span>
+                    </a>
+                    <a href="{% url 'managebookings' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-calendar-check w-6 text-center"></i>
+                        <span>Monitor Bookings</span>
+                    </a>
+                    <a href="{% url 'managepayments' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-credit-card w-6 text-center"></i>
+                        <span>Payment Management</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="border-t border-gray-700 pt-4">
+                <a href="{% url 'logout' %}"
+                    class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sign-out-alt w-6 text-center text-red-400"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-8 overflow-y-auto">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-white">Manage Users & Managers</h2>
+                    <p class="text-gray-400">Oversee all registered users and managers on the platform.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Search users..."
+                            class="bg-gray-800 text-white placeholder-gray-500 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-green-400">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    </div>
+                    <img src="https://placehold.co/100x100/1f2937/a7f3d0?text={{ request.user.fullname|slice:':1' }}" alt="Admin"
+                        class="w-10 h-10 rounded-full border-2 border-green-400">
+                </div>
+            </header>
+
+            <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-900/50">
+                        <tr>
+                            <th class="p-5 font-semibold text-white">User</th>
+                            <th class="p-5 font-semibold text-white">Role</th>
+                            <th class="p-5 font-semibold text-white">Last Login</th>
+                            <th class="p-5 font-semibold text-white">Status</th>
+                            <th class="p-5 font-semibold text-white text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        {% for user in allusers %}
+                        <tr class="hover:bg-gray-700/50 transition-colors">
+                            <td class="p-5 flex items-center gap-4">
+                                <!-- <img src="https://i.pravatar.cc/150?img=5" alt="User Avatar"
+                                    class="w-10 h-10 rounded-full"> -->
+                                <div>
+                                    <p class="font-bold text-white">{{ user.fullname }}</p>
+                                    <p class="text-sm text-gray-400">{{ user.email }}</p>
+                                </div>
+                            </td>
+                            <td class="p-5">
+                                <span
+                                    class="bg-indigo-500 text-indigo-100 text-xs font-semibold px-2.5 py-1 rounded-full">
+                                    {{ user.role }}</span>
+                            </td>
+                            <td class="p-5 text-gray-300">{{ user.last_login }}</td>
+                            <td class="p-5">
+                                {% if not user.is_blocked %}
+                                <span
+                                    class="status-active bg-green-500 text-green-100 text-xs font-semibold px-2.5 py-1 rounded-full">Active</span>
+                                {% else %}
+                                <span
+                                    class="status-blocked bg-red-500 text-red-100 text-xs font-semibold px-2.5 py-1 rounded-full">Blocked</span>
+                                {% endif %}
+                            </td>
+                            <td class="p-5">
+                                <div class="flex justify-center gap-2">
+                                    <button
+                                        data-phone="{{user.phone}}"
+                                        data-url="{% url 'block_user' user.id %}"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-3 rounded-lg transition-colors text-xs">
+                                        View
+                                    </button>
+                                    {% if not user.is_blocked %}
+                                    <!-- Block button -->
+                                    <a href="{% url 'block_user' user.id %}"
+                                        class="block-btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-3 rounded-lg transition-colors text-xs">
+                                        Block
+                                    </a>
+                                    {% else %}
+                                    <!-- Unblock button -->
+                                    <a href="{% url 'unblock_user' user.id %}"
+                                        class="unblock-btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-3 rounded-lg transition-colors text-xs">
+                                        Unblock
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    {% include "message.html" %}
+</body>
+<script>
+
+        // Function to show user details modal
+        function showUserDetails(user) {
+            // Create modal overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+            overlay.id = 'user-detail-overlay';
+
+            // Create modal container
+            const modal = document.createElement('div');
+            modal.className = 'bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden';
+
+            // Modal header
+            const header = document.createElement('div');
+            header.className = 'bg-gray-900/50 p-6 flex justify-between items-center border-b border-gray-700';
+
+            const title = document.createElement('h3');
+            title.className = 'text-xl font-bold text-white';
+            title.textContent = 'User Details';
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'text-gray-400 hover:text-white transition-colors';
+            closeBtn.innerHTML = '<i class="fas fa-times text-xl"></i>';
+            closeBtn.onclick = () => overlay.remove();
+
+            header.appendChild(title);
+            header.appendChild(closeBtn);
+
+            // Modal body
+            const body = document.createElement('div');
+            body.className = 'p-6';
+
+            // User info items
+            const createInfoRow = (label, value) => {
+                const row = document.createElement('div');
+                row.className = 'mb-4';
+
+                const labelEl = document.createElement('p');
+                labelEl.className = 'text-sm text-gray-400 mb-1';
+                labelEl.textContent = label;
+
+                const valueEl = document.createElement('p');
+                valueEl.className = 'text-white font-medium';
+                valueEl.textContent = value;
+
+                row.appendChild(labelEl);
+                row.appendChild(valueEl);
+                return row;
+            };
+
+            body.appendChild(createInfoRow('Full Name', user.fullname));
+            body.appendChild(createInfoRow('Email', user.email));
+            body.appendChild(createInfoRow('Phone', user.phone || 'Not provided'));
+            body.appendChild(createInfoRow('Role', user.role));
+
+            // Additional info based on role
+            if (user.role.toLowerCase() === 'user') {
+                body.appendChild(createInfoRow('Turf Bookings', user.bookingsCount || '0'));
+            } else if (user.role.toLowerCase() === 'owner') {
+                body.appendChild(createInfoRow('Turfs Owned', user.turfsOwned || '0'));
+            }
+
+            // Modal footer
+            const footer = document.createElement('div');
+            footer.className = 'bg-gray-900/50 px-6 py-4 flex justify-end border-t border-gray-700';
+
+            const blockBtn = document.createElement('a');
+            blockBtn.className = 'bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm';
+            blockBtn.textContent = "Block User"
+            blockBtn.href = user.url;
+
+            footer.appendChild(blockBtn);
+
+            // Assemble modal
+            modal.appendChild(header);
+            modal.appendChild(body);
+            modal.appendChild(footer);
+            overlay.appendChild(modal);
+
+            // Add to document
+            document.body.appendChild(overlay);
+
+            // Close modal when clicking outside
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.remove();
+                }
+            });
+        }
+
+        // Add event listeners to all view buttons
+        document.addEventListener('DOMContentLoaded', function () {
+            const viewButtons = document.querySelectorAll('button.bg-blue-500');
+            let user_data;
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    // Get user data from the table row
+                    user_data = button.dataset
+                    const row = this.closest('tr');
+                    const user = {
+                        fullname: row.querySelector('td:first-child p.font-bold').textContent,
+                        email: row.querySelector('td:first-child p.text-sm').textContent,
+                        role: row.querySelector('td:nth-child(2) span').textContent,
+                        // You would need to add phone and counts to your user data
+                        phone: user_data.phone, // This should come from your data
+                        url: user_data.url,
+                        bookingsCount: '5', // This should come from your data
+                        turfsOwned: '3' // This should come from your data
+                    };
+
+                    showUserDetails(user);
+                });
+            });
+        });
+    </script>
+</html>

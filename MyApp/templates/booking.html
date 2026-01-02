@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurfZone - Book Your Turf</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .turf-bg {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+            url('{{ turf.image.url }}');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white">
+    <a href="{% url 'userhome' %}"
+       class="absolute top-6 left-6 z-10 flex items-center justify-center w-12 h-12 bg-gray-800 bg-opacity-70 rounded-full text-green-400 hover:bg-green-500 hover:text-gray-900 transition-colors duration-300 shadow-lg"
+       aria-label="Go back to previous page">
+        <i class="fas fa-arrow-left text-xl"></i>
+    </a>
+
+    <div class="min-h-screen turf-bg flex items-center justify-center p-4">
+        <div
+            class="container mx-auto max-w-6xl bg-gray-800 bg-opacity-80 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+
+                <div class="p-8">
+                    <img src="{{ turf.image1.url }}" alt="{{ turf.turf_name }}"
+                        class="rounded-xl w-full h-64 object-cover mb-6 shadow-lg"
+                        onerror="this.onerror=null;this.src='https: //placehold.co/600x400/cccccc/ffffff?text=Image+Not+Found';">
+
+                    <h1 class="text-4xl font-bold text-green-400 mb-2">{{ turf.turf_name }}</h1>
+
+                    <!-- Overall Rating -->
+                    <div class="flex items-center mb-2">
+                        {% if average_rating %}
+                        <div class="flex items-center text-yellow-400 text-lg mr-2">
+                            <span class="flex items-center space-x-3 bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-lg font-bold">{{ turf.avg_rating }}
+                                    <i class="fas fa-star text-sm ml-1"></i>
+                            </span>
+                        </div>
+                        <span class="text-gray-400 text-sm">({{ reviews_count }} reviews)</span>
+                        {% else %}
+                        <span class="text-gray-400 text-sm">No ratings yet</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center text-gray-300 mb-6">
+                        <i class="fas fa-map-marker-alt mr-2 text-green-400"></i>
+                        <span>{{ turf.address }}</span>
+                    </div>
+
+
+                    <div class="grid grid-cols-2 gap-6 text-lg">
+                        <div class="bg-gray-700 bg-opacity-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-green-400 mb-1">Timings</h3>
+                            <p class="text-gray-200">
+                                <i class="far fa-clock mr-2"></i>
+                                {{ turf.opening_time|time:"g:i A" }} - {{ turf.closing_time|time:"g:i A" }}
+                            </p>
+                        </div>
+                        <div class="bg-gray-700 bg-opacity-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-green-400 mb-1">Price</h3>
+                            <p class="text-gray-200">
+                                <i class="fas fa-rupee-sign mr-2"></i>
+                                <span id="pricePerHour">{{ turf.price_per_hour }}</span> / hour
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <h3 class="text-2xl font-semibold text-green-400 mb-3">Amenities</h3>
+                        <div class="flex flex-wrap gap-4">
+                            {% for amenity in turf.facilities.all %}
+                            <span
+                                class="bg-green-500 text-gray-900 text-sm font-medium px-3 py-1 rounded-full flex items-center">
+                                <i class="{{ amenity.icon_class }} mr-2"></i>{{ amenity.name }}
+                            </span>
+                            {% empty %}
+                            <p class="text-gray-400">No amenities listed</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-gray-700">
+                        <h3 class="text-2xl font-semibold text-green-400 mb-4">Ratings & Reviews</h3>
+                        <div class="space-y-6 max-h-72 overflow-y-auto pr-4">
+
+                            {% for review in turf.reviews.all %}
+                            <div class="bg-gray-700 bg-opacity-50 p-4 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-user-circle text-2xl mr-3 text-gray-400"></i>
+                                        <div>
+                                            <p class="font-semibold text-white">{{ review.user.fullname }}</p>
+                                            <div class="text-yellow-400 flex items-center text-sm">
+                                                {% for i in "12345" %}
+                                                {% if forloop.counter <= review.rating %} <i class="fas fa-star"></i>
+                                                    {% else %}
+                                                    <i class="far fa-star"></i>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm text-gray-400">{{ review.created_at|date:"d M Y" }}</span>
+                                </div>
+                                <p class="text-gray-300 ml-9">{{ review.comment }}</p>
+                            </div>
+                            {% empty %}
+                            <div class="bg-gray-700 bg-opacity-50 p-4 rounded-lg text-center">
+                                <p class="text-gray-400">Be the first to review this turf!</p>
+                            </div>
+                            {% endfor %}
+                            
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="p-8 bg-gray-900 bg-opacity-60">
+                    <h2 class="text-3xl font-bold text-center mb-8">Book Your Slot</h2>
+                    <form id="bookingForm" class="space-y-6" method="POST" action="">
+                        {% csrf_token %}
+                        <input type="hidden" name="turf" value="{{ turf.id }}">
+                        <div>
+                            <label for="bookingDate" class="block text-sm font-medium text-gray-300 mb-1">Booking
+                                Date</label>
+                            <input type="date" id="bookingDate" name="date"
+                                class="w-full bg-gray-700 border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
+                                required>
+                        </div>
+                        <div>
+                            <label for="startTime" class="block text-sm font-medium text-gray-300 mb-1">Start
+                                Time</label>
+                            <input type="time" id="startTime" name="start_time"
+                                class="w-full bg-gray-700 border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
+                                required>
+                        </div>
+
+                        <div>
+                            <label for="duration" class="block text-sm font-medium text-gray-300 mb-1">Duration (in
+                                hours)</label>
+                            <select id="duration" name="duration"
+                                class="w-full bg-gray-700 border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
+                                required>
+                                <option value="1">1 Hour</option>
+                                <option value="1.5">1.5 Hours</option>
+                                <option value="2">2 Hours</option>
+                                <option value="2.5">2.5 Hours</option>
+                                <option value="3">3 Hours</option>
+                            </select>
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-700">
+                            <div class="flex justify-between items-center text-xl font-semibold">
+                                <span class="text-gray-300">Total Price:</span>
+                                <span class="text-green-400" id="totalPrice">₹{{ turf.price_per_hour }}</span>
+                            </div>
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-4 rounded-lg text-lg transition duration-300 shadow-lg hover:shadow-green-500/50">
+                            Confirm Booking
+                        </button>
+                    </form>
+
+                    {% if has_booked %}
+                    <div class="mt-8 pt-6 border-t border-gray-700">
+                        <h3 class="text-2xl font-semibold text-green-400 mb-4">Leave a Review</h3>
+                        <form action="{% url 'add_review' turf.id %}" method="POST" class="space-y-4">
+                            {% csrf_token %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Your Rating</label>
+                                <div id="star-rating"
+                                    class="flex justify-start items-center space-x-1 text-2xl text-gray-500">
+                                    <input type="radio" id="star5" name="rating" value="5" class="sr-only" />
+                                    <label for="star5" class="cursor-pointer"><i class="fas fa-star"></i></label>
+
+                                    <input type="radio" id="star4" name="rating" value="4" class="sr-only" />
+                                    <label for="star4" class="cursor-pointer"><i class="fas fa-star"></i></label>
+
+                                    <input type="radio" id="star3" name="rating" value="3" class="sr-only" />
+                                    <label for="star3" class="cursor-pointer"><i class="fas fa-star"></i></label>
+
+                                    <input type="radio" id="star2" name="rating" value="2" class="sr-only" />
+                                    <label for="star2" class="cursor-pointer"><i class="fas fa-star"></i></label>
+
+                                    <input type="radio" id="star1" name="rating" value="1" class="sr-only" />
+                                    <label for="star1" class="cursor-pointer"><i class="fas fa-star"></i></label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="comment" class="block text-sm font-medium text-gray-300 mb-1">Your
+                                    Review</label>
+                                <textarea id="comment" name="comment" rows="4"
+                                    class="w-full bg-gray-700 border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-green-400 focus:border-green-400 outline-none"
+                                    placeholder="Share details of your own experience at this turf..."
+                                    required></textarea>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-3 rounded-lg text-md transition duration-300">
+                                Submit Review
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmationModal"
+        class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+        <div class="bg-gray-800 rounded-lg p-8 max-w-sm mx-auto text-center shadow-2xl">
+            <div class="text-green-400 text-5xl mb-4">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-2">Booking Confirmed!</h3>
+            <p class="text-gray-300 mb-6">Your slot at {{ turf.name }} has been successfully booked. See you on the
+                field!</p>
+            <button id="closeModal"
+                class="bg-green-500 hover:bg-green-600 text-gray-900 font-bold py-2 px-6 rounded-lg transition duration-300">
+                Done
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Set minimum date for the date picker to today
+        const datePicker = document.getElementById('bookingDate');
+        const today = new Date().toISOString().split('T')[0];
+        datePicker.setAttribute('min', today);
+        datePicker.value = today;
+
+        // Price calculation
+        const durationSelect = document.getElementById('duration');
+        const pricePerHour = parseFloat(document.getElementById('pricePerHour').innerText);
+        const totalPriceElement = document.getElementById('totalPrice');
+
+        function updateTotalPrice() {
+            const duration = parseFloat(durationSelect.value);
+            if (!isNaN(duration) && !isNaN(pricePerHour)) {
+                const total = duration * pricePerHour;
+                totalPriceElement.innerText = `₹${total.toLocaleString()}`;
+            }
+        }
+
+        durationSelect.addEventListener('change', updateTotalPrice);
+        updateTotalPrice();
+
+        // Modal handling
+        const bookingForm = document.getElementById('bookingForm');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const closeModalButton = document.getElementById('closeModal');
+
+        bookingForm.addEventListener('submit', function (event) {
+            // Let Django handle form submission, remove modal popup logic if needed
+            // If you want modal before submit, prevent default:
+            // event.preventDefault();
+            // confirmationModal.classList.remove('hidden');
+        });
+
+        closeModalButton.addEventListener('click', function () {
+            confirmationModal.classList.add('hidden');
+            bookingForm.reset();
+            datePicker.value = today;
+            updateTotalPrice();
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Total Price Calculation
+            const pricePerHourElement = document.getElementById('pricePerHour');
+            const durationSelect = document.getElementById('duration');
+            const totalPriceSpan = document.getElementById('totalPrice');
+
+            if (pricePerHourElement && durationSelect && totalPriceSpan) {
+                const pricePerHour = parseFloat(pricePerHourElement.textContent) || 0;
+
+                const updateTotalPrice = () => {
+                    const duration = parseFloat(durationSelect.value);
+                    if (!isNaN(pricePerHour) && !isNaN(duration)) {
+                        const total = pricePerHour * duration;
+                        totalPriceSpan.textContent = `₹${total.toFixed(2)}`;
+                    }
+                };
+
+                durationSelect.addEventListener('change', updateTotalPrice);
+                // Initial calculation on page load
+                updateTotalPrice();
+            }
+
+            // Set minimum date for date picker to today
+            const bookingDateInput = document.getElementById('bookingDate');
+            if (bookingDateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                bookingDateInput.setAttribute('min', today);
+            }
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const stars = document.querySelectorAll("#star-rating label i");
+            const inputs = document.querySelectorAll("#star-rating input");
+            let selectedRating = 0;
+
+            stars.forEach((star, index) => {
+                const input = inputs[inputs.length - 1 - index]; // reverse order due to flex-row-reverse
+                const ratingValue = parseInt(input.value);
+
+                // Hover effect
+                star.parentElement.addEventListener("mouseenter", () => {
+                    highlightStars(ratingValue);
+                });
+
+                star.parentElement.addEventListener("mouseleave", () => {
+                    highlightStars(selectedRating);
+                });
+
+                // Click event (select/unselect)
+                star.parentElement.addEventListener("click", (e) => {
+                    e.preventDefault(); // Prevent label selecting radio
+                    if (selectedRating === ratingValue) {
+                        // unselect if clicked again
+                        selectedRating = 0;
+                        input.checked = false;
+                    } else {
+                        selectedRating = ratingValue;
+                        input.checked = true;
+                    }
+                    highlightStars(selectedRating);
+                });
+            });
+
+            function highlightStars(rating) {
+                stars.forEach((star, index) => {
+                    const value = parseInt(inputs[inputs.length - 1 - index].value);
+                    if (value <= rating) {
+                        star.classList.add("text-yellow-400");
+                        star.classList.remove("text-gray-500");
+                    } else {
+                        star.classList.remove("text-yellow-400");
+                        star.classList.add("text-gray-500");
+                    }
+                });
+            }
+        });
+
+    </script>
+</body>
+{% include "message.html" %}
+
+</html>

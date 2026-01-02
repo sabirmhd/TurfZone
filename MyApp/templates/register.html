@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - TurfZone</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles for a modern, sporty theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Set solid blue background */
+            background-color: #111827;
+            background-image: none;
+        }
+
+        /* Custom radio button styling */
+        .custom-radio:checked {
+            background-color: #34D399;
+            /* Green-400 */
+        }
+
+        .custom-radio:checked+label {
+            border-color: #34D399;
+            /* Green-400 */
+            color: #F9FAFB;
+            /* Gray-50 */
+        }
+    </style>
+</head>
+
+<body class="text-gray-200">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+
+        <div class="w-full max-w-md">
+            <!-- Logo and Header -->
+            <div class="text-center mb-8">
+                <h3 class="text-4xl md:text-5xl font-bold text-green tracking-tight">
+                    <span class="text-green-400">Turf</span>Zone
+                </h3>
+                <p class="text-gray-400 mt-2">Create Your Account & Get in the Game</p>
+            </div>
+
+            <!-- Registration Form Card -->
+            <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl p-6 md:p-8">
+                <form id="registrationForm" method="POST">
+                    <!-- User Type Selection -->
+                    {% csrf_token %}
+                    <div>
+                        <label class="text-sm font-medium text-gray-300">I am a...</label>
+                        <div class="grid grid-cols-2 gap-4 mt-2">
+                            <div>
+                                <input type="radio" name="user_type" value="player" id="player"
+                                    class="hidden custom-radio" checked>
+                                <label for="player"
+                                    class="block w-full text-center p-4 rounded-lg border-2 border-gray-600 cursor-pointer transition-colors hover:border-green-400">Player</label>
+                            </div>
+                            <div>
+                                <input type="radio" name="user_type" value="owner" id="owner"
+                                    class="hidden custom-radio">
+                                <label for="owner"
+                                    class="block w-full text-center p-4 rounded-lg border-2 border-gray-600 cursor-pointer transition-colors hover:border-green-400">Turf
+                                    Owner</label>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <!-- Full Name Input -->
+                    <div class="mb-4">
+                        <label for="fullname" class="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                        <input type="text" id="fullname" name="fullname"
+                            class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+                            placeholder="e.g., John Doe" required>
+                    </div>
+
+                    <!-- Email Input -->
+                    <div class="mb-4">
+                        <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                        <input type="email" id="email" name="email"
+                            class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+                            placeholder="you@example.com" required>
+                    </div>
+
+                    <!-- Phone Input -->
+                    <div class="mb-4">
+                        <label for="phone" class="block text-sm font-medium text-gray-300 mb-2">Phone number</label>
+                        <input type="tel" id="phone" name="phone"
+                            class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+                            placeholder="12345" required>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="mb-4">
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <input type="password" id="password" name="password"
+                            class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+                            placeholder="••••••••" required>
+                    </div>
+
+                    <!-- Confirm Password Input -->
+                    <div class="mb-6">
+                        <label for="confirm_password" class="block text-sm font-medium text-gray-300 mb-2">Confirm
+                            Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password"
+                            class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+                            placeholder="••••••••" required>
+                        <p id="password-error" class="text-red-500 text-xs mt-2 hidden">Passwords do not match.</p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div>
+                        <button type="submit" id="submit-button"
+                            class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 focus:outline-none focus:ring-4 focus:ring-green-500/50 transition-all duration-300 transform hover:scale-105 disabled:bg-gray-500 disabled:cursor-not-allowed disabled:scale-100">
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Login Link -->
+                <p class="text-center text-gray-400 text-sm mt-6">
+                    Already have an account?
+                    <a href="{% url 'login' %}" class="font-medium text-green-400 hover:text-green-300">
+                        Login here
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% include "message.html" %}
+
+</body>
+
+</html>

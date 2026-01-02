@@ -1,0 +1,35 @@
+{% if messages %}
+<div class="fixed {{ position|default:'top-14 right-4' }} z-50 space-y-3">
+    {% for message in messages %}
+        <div class="px-4 py-3 rounded-lg shadow-lg text-white
+            {% if message.tags == 'success' %} bg-green-500
+            {% elif message.tags == 'error' %} bg-red-500
+            {% elif message.tags == 'warning' %} bg-yellow-500 text-black
+            {% else %} bg-gray-700 {% endif %}">
+            
+            <div class="flex items-center justify-between gap-4">
+                <span>{{ message }}</span>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        class="text-white hover:text-gray-200 font-bold">&times;</button>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Select all messages inside fixed container
+        const messages = document.querySelectorAll(".fixed .shadow-lg");
+
+        messages.forEach((msg) => {
+            // Auto fade-out after 2 seconds
+            setTimeout(() => {
+                msg.style.transition = "opacity 0.5s ease";
+                msg.style.opacity = "0";
+                setTimeout(() => msg.remove(), 500); // remove after fade
+            }, 2000);
+        });
+    });
+
+</script>
+

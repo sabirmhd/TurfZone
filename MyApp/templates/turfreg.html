@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Your Turf - TurfZone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- THEME: Modern Sports Dark --- */
+        :root {
+            --primary-color: #00f2a9; /* Electric Green Accent */
+            --primary-hover: #00d998;
+            --background-dark: #1a1d24;
+            --background-card: #252934;
+            --background-input: #323745;
+            --text-primary: #ffffff;
+            --text-secondary: #a9b3c1;
+            --border-color: #4a4f5a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-dark);
+            /* Background image with a dark overlay for atmosphere */
+            background-image: linear-gradient(rgba(26, 29, 36, 0.92), rgba(26, 29, 36, 0.97)), url('https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1935&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        /* --- Main Form Container --- */
+        .form-container {
+            width: 100%;
+            max-width: 850px;
+            background-color: var(--background-card);
+            border-radius: 12px;
+            border-top: 4px solid var(--primary-color);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            padding: 3rem;
+        }
+
+        .form-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-header p {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        /* --- Form Sections --- */
+        .form-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .section-title i {
+            color: var(--primary-color);
+        }
+        
+        /* --- Form Group & Input Styling --- */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background-color: var(--background-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+             color: #7d8594;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 242, 169, 0.2);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .helper-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        /* --- Custom Checkbox Group Styling --- */
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        .checkbox-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-item input[type="checkbox"] {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .checkbox-item label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background-color: var(--background-input);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            transition: all 0.3s;
+            width: 100%;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+        .checkbox-item label::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--background-card);
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        .checkbox-item input:checked + label {
+            border-color: var(--primary-color);
+            color: var(--text-primary);
+        }
+        .checkbox-item input:checked + label::before {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%231a1d24' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        /* --- File Uploader Styling --- */
+        .file-uploader {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s, background-color 0.3s;
+            background-color: var(--background-input);
+        }
+        .file-uploader:hover {
+            border-color: var(--primary-color);
+            background-color: #3f4554;
+        }
+        .file-uploader .upload-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+        #file-input { display: none; }
+
+        /* --- Footer and Submit Button --- */
+        .form-footer {
+            margin-top: 2.5rem;
+            text-align: center;
+        }
+        .submit-btn {
+            width: 100%;
+            max-width: 350px;
+            padding: 1rem 1.5rem;
+            background: var(--primary-color);
+            color: var(--background-dark);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0, 242, 169, 0.2);
+        }
+        .submit-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 25px rgba(0, 242, 169, 0.3);
+        }
+
+        /* --- Responsive Adjustments --- */
+        @media (max-width: 600px) {
+            body { padding: 1rem; }
+            .form-container { padding: 1.5rem; }
+            .form-header h1 { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="form-container">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <header class="form-header">
+                <h1>Register Your Turf</h1>
+                <p>Join TurfZone and get your venue in the game. Fill out the details below.</p>
+            </header>
+
+            <section class="form-section">
+                <h2 class="section-title"><i class="fa-solid fa-clipboard-list"></i> Arena Details</h2>
+                <div class="form-group">
+                    <label for="turf-name">Turf Name</label>
+                    <input type="text" id="turf-name" name="turf_name" placeholder="e.g., Greenfield Arena" required>
+                </div>
+                <div class="form-group">
+                    <label>Sports Available</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item"><input type="checkbox" id="sport-football" name="sport_type" value="football"><label for="sport-football">Football</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="sport-tennis" name="sport_type" value="tennis"><label for="sport-tennis">Tennis</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="sport-cricket" name="sport_type" value="cricket"><label for="sport-cricket">Cricket</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="sport-badminton" name="sport_type" value="badminton"><label for="sport-badminton">Badminton</label></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="turf-description">Description</label>
+                    <textarea id="turf-description" name="description" placeholder="Describe the pitch, lighting, and what makes your turf unique." required></textarea>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <h2 class="section-title"><i class="fa-solid fa-map-location-dot"></i> Location</h2>
+                <div class="form-grid">
+                    <div class="form-group"><label for="address">Address Line</label><input type="text" id="address" name="address" required></div>
+                    <div class="form-group"><label for="city">City</label><input type="text" id="city" name="city" placeholder="e.g., Thiruvananthapuram" required></div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <select id="state" name="state" required><option value="Kerala" selected>Kerala</option><option value="Tamil Nadu">Tamil Nadu</option><option value="Karnataka">Karnataka</option></select>
+                    </div>
+                    <div class="form-group"><label for="pincode">Pincode</label><input type="text" id="pincode" name="pincode" pattern="[0-9]{6}" maxlength="6" placeholder="e.g., 695001" required></div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Operations</h2>
+                 <div class="form-grid">
+                    <div class="form-group"><label for="price">Price per Hour (₹)</label><input type="number" id="price" name="price_per_hour" placeholder="1200" min="0" required></div>
+                    <div class="form-group"><label for="opening-time">Opening Time</label><input type="time" id="opening-time" name="opening_time" required></div>
+                    <div class="form-group"><label for="closing-time">Closing Time</label><input type="time" id="closing-time" name="closing_time" required></div>
+                </div>
+            </section>
+            
+            <section class="form-section">
+                <h2 class="section-title"><i class="fa-solid fa-square-check"></i> Facilities & Photos</h2>
+                <div class="form-group">
+                    <label>Available Facilities</label>
+                    <div class="checkbox-group">
+                        {% for facility in facilities %}
+                        <div class="checkbox-item"><input type="checkbox" id="facility-floodlights" name="facilities" value="{{facility.id}}"><label for="facility-floodlights">{{facility.name}}</label></div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Turf Images</label>
+                    <label for="file-input" class="file-uploader">
+                        <div class="upload-icon"><i class="fa-solid fa-images"></i></div>
+                        <p>Drag & Drop or <strong>Click to Upload</strong></p>
+                        <p class="helper-text">High-quality JPG or PNG files recommended.</p>
+                    </label>
+                    <input type="file" id="file-input" name="image1" accept="image/*">
+                </div>
+            </section>
+
+            <footer class="form-footer">
+                <button type="submit" class="submit-btn">List My Turf</button>
+            </footer>
+        </form>
+    </main>
+{% include "message.html" %}
+</body>
+</html>

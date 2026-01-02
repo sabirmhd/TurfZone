@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard - TurfZone</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            /* bg-gray-900 */
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #22c55e;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16a34a;
+        }
+
+        /* Sidebar active link style */
+        .sidebar-link.active {
+            background-color: #10b981;
+            /* bg-green-600 */
+            color: white;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
+        }
+
+        /* Modal transition */
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .modal.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        /* Custom styles for pricing calendar */
+        .time-slot {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .time-slot:hover {
+            transform: scale(1.05);
+            border-color: #22c55e;
+        }
+    </style>
+</head>
+
+<body class="text-gray-300">
+
+    <div class="flex h-screen bg-gray-900">
+        <aside class="w-64 flex-shrink-0 bg-gray-800 p-4 hidden md:flex flex-col justify-between">
+            <div>
+                <div class="text-2xl font-bold text-white tracking-tight mb-10 text-center">
+                    <span class="text-green-400">Turf</span>Zone
+                    <p class="text-xs font-normal text-gray-400 mt-1">Owner Panel</p>
+                </div>
+                <nav class="space-y-2">
+                    <a href="#dashboard" onclick="showSection('dashboard')"
+                        class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-200">
+                        <i data-feather="grid"></i><span>Dashboard</span>
+                    </a>
+                    <a href="#turfs" onclick="showSection('turfs')"
+                        class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-200">
+                        <i data-feather="map-pin"></i><span>My Turfs</span>
+                    </a>
+                    <a href="#bookings" onclick="showSection('bookings')"
+                        class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-200">
+                        <i data-feather="calendar"></i><span>Manage Bookings</span>
+                    </a>
+                    <a href="#payments" onclick="showSection('payments')"
+                        class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-200">
+                        <i data-feather="dollar-sign"></i><span>Payments</span>
+                    </a>
+                    <a href="#earnings" onclick="showSection('earnings')"
+                        class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-200">
+                        <i data-feather="bar-chart-2"></i><span>Earnings</span>
+                    </a>
+                    <a href="#pending" onclick="showSection('pending')"
+                        class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition duration-200">
+                        <i data-feather="loader"></i><span>Pending</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="text-center">
+                <a href="{% url 'logout' %}"
+                    class="bg-red-500 text-white font-medium py-2 px-4 rounded-lg hover:bg-red-600 transition flex justify-center items-center space-x-2">Logout</a>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-6 md:p-10">
+            <div class="md:hidden flex justify-between items-center mb-6">
+                <div class="text-xl font-bold text-white tracking-tight">
+                    <span class="text-green-400">Turf</span>Zone
+                </div>
+                <button id="mobile-menu-btn"><i data-feather="menu"></i></button>
+            </div>
+
+            <section id="dashboard-section" class="content-section">
+                <h1 class="text-3xl font-bold text-white mb-6">Dashboard</h1>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gray-800 p-6 rounded-xl flex items-center space-x-4">
+                        <div class="bg-green-500/20 p-3 rounded-full"><i data-feather="dollar-sign"
+                                class="text-green-400"></i></div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Total Revenue</p>
+                            <p class="text-2xl font-bold text-white">₹{{ total_revenue }}</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl flex items-center space-x-4">
+                        <div class="bg-blue-500/20 p-3 rounded-full"><i data-feather="calendar"
+                                class="text-blue-400"></i></div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Total Bookings</p>
+                            <p class="text-2xl font-bold text-white">{{ total_bookings }}</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl flex items-center space-x-4">
+                        <div class="bg-yellow-500/20 p-3 rounded-full"><i data-feather="clock"
+                                class="text-yellow-400"></i></div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Pending Requests</p>
+                            <p class="text-2xl font-bold text-white">{{ pending_count }}</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl flex items-center space-x-4">
+                        <div class="bg-pink-500/20 p-3 rounded-full"><i data-feather="star" class="text-pink-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-sm">Avg. Rating</p>
+                            <p class="text-2xl font-bold text-white">{{ avg_rating }}</p>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-4">Recent Activity</h2>
+                <div class="bg-gray-800 p-4 rounded-xl">
+                </div>
+            </section>
+
+            <section id="turfs-section" class="content-section hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold text-white">My Turfs</h1>
+                    <button onclick="openAddTurfModal()"
+                        class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition flex items-center space-x-2">
+                        <i data-feather="plus" class="w-5 h-5"></i>
+                        <a href="{% url 'turfreg' %}">Add New Turf</a>
+                    </button>
+                </div>
+                <div id="owner-turf-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for turf in approved %}
+                    <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg">
+                        {% if turf.image1 %}
+                        <img src="{{ turf.image1.url }}" alt="{{ turf.turf_name }}" class="w-full h-40 object-cover">
+                        {% else %}
+                        <img src="" alt="" class="w-full h-40 object-cover">
+                        {% endif %}
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-white">{{turf.turf_name}}</h3>
+                            <p class="text-gray-400 text-sm mb-3">{{turf.location}}</p>
+                            <div class="flex justify-end space-x-2 mt-4">
+                                <button
+                                    class="text-sm bg-blue-500/80 text-white font-semibold py-2 px-3 rounded-lg hover:bg-blue-600"
+                                    onclick="openEditModal(this)"
+                                    data-turf-id="{{ turf.id }}"
+                                    data-turf-name="{{ turf.turf_name }}"
+                                    data-turf-description="{{ turf.description }}"
+                                    data-turf-price="{{ turf.price_per_hour }}">
+                                    Edit
+                                </button>
+                                <button 
+                                    onclick="openDeleteModal('{{ turf.id }}', '{{ turf.turf_name }}')"
+                                    class="text-sm bg-red-500/80 text-white font-semibold py-2 px-3 rounded-lg hover:bg-red-600">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div id="editTurfModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50">
+                            <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 class="text-2xl font-bold text-white">Edit Turf Details</h2>
+                                    <button onclick="closeEditModal()" class="text-gray-400 hover:text-white">&times;</button>
+                                </div>
+
+                                <form id="edit-turf-form" method="POST" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    
+                                    <div class="mb-4">
+                                        <label for="edit-turf-name" class="block text-sm font-medium text-gray-300">Turf Name</label>
+                                        <input type="text" id="edit-turf-name" name="turf_name" required
+                                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="edit-turf-description" class="block text-sm font-medium text-gray-300">Description</label>
+                                        <textarea id="edit-turf-description" name="description" rows="3"
+                                                class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="edit-turf-price" class="block text-sm font-medium text-gray-300">Price Per Hour</label>
+                                        <input type="number" id="edit-turf-price" name="price_per_hour" step="0.01" required
+                                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="edit-opening-time" class="block text-sm font-medium text-gray-300">Opening Time</label>
+                                        <input type="time" id="edit-opening-time" name="opening_time" value="{{ turf.opening_time|time:'H:i' }}" required
+                                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="edit-closing-time" class="block text-sm font-medium text-gray-300">Closing Time</label>
+                                        <input type="time" id="edit-closing-time" name="closing_time" value="{{ turf.closing_time|time:'H:i' }}" required
+                                            class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    </div>
+                                    
+                                    <div class="mb-6">
+                                        <label for="edit-turf-image" class="block text-sm font-medium text-gray-300">Update Image (Optional)</label>
+                                        <input type="file" id="edit-turf-image" name="image1" accept="image/*"
+                                            class="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    </div>
+
+                                    <div class="flex justify-end space-x-3">
+                                        <button type="button" onclick="closeEditModal()"
+                                                class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700">Cancel</button>
+                                        <button type="submit"
+                                                class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+            </section>
+
+            <section id="bookings-section" class="content-section hidden">
+                <h1 class="text-3xl font-bold text-white mb-6">Manage Bookings</h1>
+                <div class="bg-gray-800 p-6 rounded-xl">
+
+                    <!-- Pending Requests -->
+                    <h2 class="text-xl font-bold text-white mb-4">Pending Requests</h2>
+                    <div class="space-y-4 mb-8">
+                        {% for booking in bookings %}
+                        {% if booking.status == "pending" %}
+                        <div
+                            class="bg-gray-900 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-gray-700/50">
+                            <div class="flex-grow">
+                                <h3 class="font-bold text-white text-lg">{{ booking.turf.turf_name }}</h3>
+                                <p class="text-sm text-gray-400 mb-3 flex items-center gap-1">
+                                    <i data-feather="map-pin" class="w-4 h-4"></i> {{ booking.turf.location }}
+                                </p>
+                                <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-300">
+                                <span class="flex items-center gap-1"><i data-feather="user" class="w-4 h-4"></i> {{ booking.user.fullname }}</span>
+                                    <span class="flex items-center gap-1"><i data-feather="calendar"
+                                            class="w-4 h-4"></i> {{ booking.booking_date }}</span>
+                                    <span class="flex items-center gap-1"><i data-feather="clock" class="w-4 h-4"></i>
+                                        {{ booking.start_time }} - {{ booking.end_time }}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col sm:items-end">
+                                <p class="text-lg font-bold text-green-400 mb-2">₹{{ booking.total_amount }}</p>
+                                <div class="flex gap-2">
+                                    <div class="flex items-center gap-3 mt-4 sm:mt-0">
+                                        <span
+                                            class="text-sm font-semibold capitalize px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400">Pending</span>
+                                        <a href="{% url 'confirm_booking' booking.id %}"
+                                            class="bg-green-500 text-white font-bold py-1.5 px-4 rounded-lg text-sm hover:bg-green-600 transition">
+                                            Confirm
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% empty %}
+                        <p class="text-gray-400 text-center py-4">No pending requests.</p>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Confirmed & Past -->
+                    <h2 class="text-xl font-bold text-white mb-4">Confirmed & Past Bookings</h2>
+                    <div class="space-y-4">
+                        {% for booking in bookings %}
+                        {% if booking.status != "pending" %}
+                        <div
+                            class="bg-gray-900 p-4 rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-gray-700/50">
+                            <div class="flex-grow">
+                                <h3 class="font-bold text-white text-lg">{{ booking.turf.turf_name }}</h3>
+                                <p class="text-sm text-gray-400 mb-3 flex items-center gap-1">
+                                    <i data-feather="map-pin" class="w-4 h-4"></i> {{ booking.turf.location }}
+                                </p>
+                                <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-300">
+                                <span class="flex items-center gap-1"><i data-feather="user" class="w-4 h-4"></i> {{ booking.user.fullname }}</span>
+                                    <span class="flex items-center gap-1"><i data-feather="calendar"
+                                            class="w-4 h-4"></i> {{ booking.booking_date }}</span>
+                                    <span class="flex items-center gap-1"><i data-feather="clock" class="w-4 h-4"></i>
+                                        {{ booking.start_time }} - {{ booking.end_time }}</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col sm:items-end">
+                                <p class="text-lg font-bold text-green-400 mb-2">₹{{ booking.total_amount }}</p>
+                                <span class="text-sm px-3 py-1 rounded-full 
+                            {% if booking.status == 'confirmed' %} bg-blue-500/20 text-blue-400 
+                            {% else %} bg-green-500/20 text-green-400 {% endif %}">
+                                    {{ booking.status|capfirst }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% empty %}
+                        <p class="text-gray-400 text-center py-4">No confirmed or past bookings.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <section id="payments-section" class="content-section hidden">
+                <h1 class="text-3xl font-bold text-white mb-6">Payment History</h1>
+                <div class="bg-gray-800 p-4 sm:p-6 rounded-xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-400">
+                            <thead class="text-xs text-gray-400 uppercase bg-gray-700/50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">User Details</th>
+                                    <th scope="col" class="px-6 py-3">Turf Booked</th>
+                                    <th scope="col" class="px-6 py-3">Booking Date</th>
+                                    <th scope="col" class="px-6 py-3 text-right">Amount</th>
+                                    <th scope="col" class="px-6 py-3 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr class="border-b border-gray-700">
+                                    <td class="px-6 py-4 font-medium text-white whitespace-nowrap">
+                                        <div>{{ booking.user.fullname }}</div>
+                                        <div class="text-xs text-gray-500">{{ booking.user.email }}</div>
+                                    </td>
+                                    <td class="px-6 py-4">{{ booking.turf.turf_name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ booking.booking_date }}</td>
+                                    <td class="px-6 py-4 text-right font-semibold text-green-400">₹{{ booking.total_amount }}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        {% if booking.status == 'pending' %}
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-500/20 text-yellow-400">
+                                            Pending
+                                        </span>
+                                        {% else %}
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-400">
+                                            Confirmed
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-8 text-gray-500">
+                                        No payment records found.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="earnings-section" class="content-section hidden">
+                <h1 class="text-3xl font-bold text-white mb-6">Earnings Report</h1>
+                <div class="bg-gray-800 p-6 rounded-xl">
+                    <h2 class="text-xl font-bold text-white mb-4">Revenue Analytics</h2>
+                    <div id="earnings-chart" class="h-64"></div>
+                </div>
+            </section>
+            <section id="pending-section" class="content-section hidden">
+                <h1 class="text-3xl font-bold text-white mb-6">Pending Turf Approvals</h1>
+                <div id="pending-turf-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for turf in pending %}
+                    <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg">
+                        {% if turf.image1 %}
+                        <img src="{{ turf.image1.url }}" alt="{{ turf.turf_name }}" class="w-full h-40 object-cover">
+                        {% else %}
+                        <img src="" alt="" class="w-full h-40 object-cover">
+                        {% endif %}
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-white">{{ turf.turf_name }}</h3>
+                            <p class="text-gray-400 text-sm mb-3">{{ turf.location }}</p>
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm bg-gray-700 text-green-400 px-3 py-1 rounded-full">{{ turf.sport_type }}</span>
+                                <span class="text-lg font-bold text-white">₹{{ turf.price_per_hour }}/hr</span>
+                            </div>
+                            <div class="flex justify-end space-x-2 mt-4">
+                                <span
+                                    class="text-sm font-semibold py-2 px-4 rounded-lg flex items-center gap-2 bg-yellow-500/20 text-yellow-400">
+                                    <i data-feather="clock" class="w-4 h-4"></i>To be Approved
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-400 col-span-full">No turfs available.</p>
+                    {% endfor %}
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="modal-container" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 hidden">
+        <div id="modal-content"
+            class="bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8 relative"
+            onclick="event.stopPropagation()">
+        </div>
+    </div>
+
+    
+        <div id="deleteTurfModal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50 transition-opacity duration-300">
+        <div class="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md transform transition-transform duration-300 scale-95">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-white">Confirm Deletion</h2>
+                <button onclick="closeDeleteModal()" class="text-gray-400 hover:text-white text-3xl font-light">&times;</button>
+            </div>
+            <p id="delete-modal-text" class="text-gray-300 mb-6">Are you sure you want to delete this turf?</p>
+            
+            <form id="delete-turf-form" method="POST">
+                {% csrf_token %}
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeDeleteModal()"
+                        class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition">
+                        Confirm Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Feather Icons Initialization ---
+        feather.replace();
+
+        // --- Navigation Logic ---
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => section.classList.add('hidden'));
+            document.getElementById(`${sectionId}-section`).classList.remove('hidden');
+
+            document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+            document.querySelector(`a[href="#${sectionId}"]`).classList.add('active');
+        }
+
+
+
+        // --- Modal Logic ---
+        const modalContainer = document.getElementById('modal-container');
+        const modalContent = document.getElementById('modal-content');
+
+
+
+        // Turf edits
+
+            const modal = document.getElementById('editTurfModal');
+            const editForm = document.getElementById('edit-turf-form');
+            const turfNameInput = document.getElementById('edit-turf-name');
+            const turfDescriptionInput = document.getElementById('edit-turf-description');
+            const turfPriceInput = document.getElementById('edit-turf-price');
+            const openingtimeInput = document.getElementById('edit-opening-time');
+            const closingtimeInput = document.getElementById('edit-closing-time');
+
+            function openEditModal(button) {
+                // Get data from the button's data-* attributes
+                const turfId = button.dataset.turfId;
+                const turfName = button.dataset.turfName;
+                const turfDescription = button.dataset.turfDescription;
+                const turfPrice = button.dataset.turfPrice;
+                const turfOpeningtime = button.dataset.turfOpeningtime;
+                const turfClosingtime = button.dataset.turfClosingtime;
+
+                // Set the form's action URL dynamically
+                editForm.action = `/edit_turf/${turfId}/`;
+
+                // Populate the form fields with the turf's current data
+                turfNameInput.value = turfName;
+                turfDescriptionInput.value = turfDescription;
+                turfPriceInput.value = turfPrice;
+                openingtimeInput.value = openingtimeInput;
+                closingtimeInput.value = closingtimeInput;
+
+                // Show the modal
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function closeEditModal() {
+                // Hide the modal
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            // Optional: Close modal if user clicks outside of the content box
+            window.addEventListener('click', function(event) {
+                if (event.target == modal) {
+                    closeEditModal();
+                }
+            });
+
+
+        //chart
+        const monthlyLabels = JSON.parse('{{ monthly_earnings_labels|safe }}');
+        const monthlyData = JSON.parse('{{ monthly_earnings_data|safe }}');
+
+
+        // --- MODIFIED: The renderEarningsChart function ---
+        function renderEarningsChart() {
+            const container = document.getElementById('earnings-chart');
+
+            // Check if there's any data to avoid errors
+            if (!container || monthlyData.length === 0) return;
+
+            // Find the maximum earning to scale the bars correctly.
+            // Add a check for all-zero data to prevent division by zero.
+            const maxEarning = Math.max(...monthlyData);
+            if (maxEarning === 0) {
+                container.innerHTML = `<div class="flex items-center justify-center h-full text-gray-500">No earnings data for this year.</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="flex items-end justify-between h-full w-full gap-2 sm:gap-4">
+                    ${monthlyData.map((val, i) => {
+                        // Calculate bar height as a percentage of the max earning
+                        const barHeight = (val / maxEarning) * 100;
+                        return `
+                        <div class="flex-1 flex flex-col items-center justify-end gap-2 h-full" title="₹${val.toFixed(2)}">
+                            <div class="bg-green-500 w-full rounded-t-lg transition-colors hover:bg-green-400" style="height: ${barHeight}%"></div>
+                            <p class="text-xs text-gray-400">${monthlyLabels[i]}</p>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+
+// --- Initial Load ---
+            document.addEventListener('DOMContentLoaded', () => {
+                showSection('dashboard');
+                renderEarningsChart(); // Call the function to render the chart
+                feather.replace();  // Re-run feather after all dynamic content is added
+            });
+
+
+            // --- Add this new code for the Delete Modal ---
+
+            const deleteModal = document.getElementById('deleteTurfModal');
+            const deleteForm = document.getElementById('delete-turf-form');
+            const deleteModalText = document.getElementById('delete-modal-text');
+
+            function openDeleteModal(turfId, turfName) {
+                // Set the form's action URL dynamically based on the turf ID
+                deleteForm.action = `/delete_turf/${turfId}/`;
+                
+                // Customize the modal's text for better user experience
+                deleteModalText.innerText = `Are you sure you want to delete "${turfName}"? This action cannot be undone.`;
+
+                // Show the modal with a smooth transition
+                deleteModal.classList.remove('hidden');
+                setTimeout(() => {
+                    deleteModal.classList.add('opacity-100');
+                    deleteModal.querySelector('.transform').classList.remove('scale-95');
+                    deleteModal.querySelector('.transform').classList.add('scale-100');
+                }, 10);
+            }
+
+            function closeDeleteModal() {
+                // Hide the modal with a smooth transition
+                deleteModal.querySelector('.transform').classList.add('scale-95');
+                deleteModal.querySelector('.transform').classList.remove('scale-100');
+                deleteModal.classList.remove('opacity-100');
+                setTimeout(() => {
+                    deleteModal.classList.add('hidden');
+                }, 300); // Wait for the transition to finish
+            }
+
+            // Optional: Close delete modal if user clicks outside of the content box
+            window.addEventListener('click', function(event) {
+                if (event.target == deleteModal) {
+                    closeDeleteModal();
+                }
+            });
+
+    </script>
+    {% include "message.html" %}
+</body>
+
+</html>

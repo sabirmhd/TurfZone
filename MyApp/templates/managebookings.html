@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurfZone - Monitor Bookings</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles to integrate with Tailwind */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #111827;
+            /* bg-gray-900 */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-200">
+
+    <div class="flex h-screen">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 flex-shrink-0 bg-gray-800 p-6 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-3 mb-10">
+                    <i class="fas fa-futbol text-green-400 text-3xl"></i>
+                    <h1 class="text-2xl font-bold text-white">TurfZone</h1>
+                </div>
+                <nav class="flex flex-col gap-4">
+                    <a href="{% url 'admindash' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-tachometer-alt w-6 text-center"></i>
+                        <span class="font-semibold">Dashboard</span>
+                    </a>
+                    <a href="{% url 'manageusers' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-users w-6 text-center"></i>
+                        <span>Manage Users</span>
+                    </a>
+                    <a href="{% url 'turfreq' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-file-signature w-6 text-center"></i>
+                        <span>Turf Requests</span>
+                    </a>
+                    <a href="{% url 'manageturf' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-layer-group w-6 text-center"></i>
+                        <span>Manage Turfs</span>
+                    </a>
+                    <!-- Active Link: Monitor Bookings -->
+                    <a href="{% url 'managebookings' %}" class="flex items-center gap-3 p-3 rounded-lg bg-gray-900 text-white shadow-md">
+                        <i class="fas fa-calendar-check w-6 text-center text-green-400"></i>
+                        <span>Monitor Bookings</span>
+                    </a>
+                    <a href="{% url 'managepayments' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-credit-card w-6 text-center"></i>
+                        <span>Payment Management</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="border-t border-gray-700 pt-4">
+                <a href="{% url 'logout' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sign-out-alt w-6 text-center text-red-400"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-white">Monitor Bookings</h2>
+                    <p class="text-gray-400">Track all bookings and cancellations in real-time.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/3 text-gray-400"></i>
+                        <input type="text" placeholder="Search bookings..."
+                            class="bg-gray-800 border border-gray-700 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-green-400 text-white">
+                    </div>
+                    <button class="relative">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span
+                            class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full text-xs flex items-center justify-center">3</span>
+                    </button>
+                    <img src="https://placehold.co/100x100/1f2937/a7f3d0?text=A" alt="Admin"
+                        class="w-10 h-10 rounded-full border-2 border-green-400">
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-6">
+                    <div class="bg-green-500/20 p-4 rounded-full">
+                        <i class="fas fa-calendar-day text-green-400 text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Bookings Today</p>
+                        <p class="text-2xl font-bold text-white">{{ bookings_today }}</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-6">
+                    <div class="bg-blue-500/20 p-4 rounded-full">
+                        <i class="fas fa-calendar-week text-blue-400 text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Bookings This Week</p>
+                        <p class="text-2xl font-bold text-white">{{ bookings_week }}</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-6">
+                    <div class="bg-indigo-500/20 p-4 rounded-full">
+                        <i class="fas fa-calendar-alt text-indigo-400 text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Bookings This Month</p>
+                        <p class="text-2xl font-bold text-white">{{ bookings_month }}</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex items-center gap-6">
+                    <div class="bg-red-500/20 p-4 rounded-full">
+                        <i class="fas fa-times-circle text-red-400 text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-400 text-sm">Total Cancellations</p>
+                        <p class="text-2xl font-bold text-white">{{ total_cancellations }}</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- All Bookings Table -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+                <h3 class="font-bold text-white mb-4">All Bookings</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-gray-400 border-b border-gray-700">
+                                <th class="p-3">User</th>
+                                <th class="p-3">Turf Name</th>
+                                <th class="p-3">Date & Time</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3">Booking ID</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in all_bookings %}
+                            <tr class="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
+                                <td class="p-3">{{ booking.user.fullname }}</td>
+                                <td class="p-3">{{ booking.turf.turf_name }}</td>
+                                <td class="p-3 text-gray-400">
+                                    {{ booking.booking_date|date:"M d, Y" }} - {{ booking.start_time|time:"h:i A" }}
+                                </td>
+                                <td class="p-3">
+                                    {% if booking.status == "confirmed" %}
+                                        <span class="bg-green-500/20 text-green-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Confirmed</span>
+                                    {% elif booking.status == "pending" %}
+                                        <span class="bg-yellow-500/20 text-yellow-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Pending</span>
+                                    {% elif booking.status == "cancelled" %}
+                                        <span class="bg-red-500/20 text-red-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Cancelled</span>
+                                    {% elif booking.status == "completed" %}
+                                        <span class="bg-blue-500/20 text-blue-400 text-xs font-semibold px-2.5 py-0.5 rounded-full">Completed</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-3 text-gray-400">BKD{{ booking.id }}</td>
+                                <td class="p-3 text-right">
+                                    {% if booking.status in "pending confirmed" %}
+                                        <a href="#"
+                                        class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg shadow-red-900/30">
+                                            Cancel
+                                        </a>
+                                    {% else %}
+                                        <button class="bg-gray-600 text-gray-400 font-medium py-2 px-4 rounded-lg cursor-not-allowed" disabled>
+                                            Cancelled
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="p-3 text-center text-gray-400">No bookings available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Cancel Modal for Alex Johnson -->
+    <dialog id="cancelModal1" class="modal backdrop-blur-sm">
+        <div class="modal-box bg-gray-800 border border-gray-700 rounded-xl shadow-2xl">
+            <div class="flex items-center mb-4">
+                <div class="p-2 rounded-full bg-red-900/30 mr-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-100">Cancel Booking?</h3>
+            </div>
+            <p class="py-4 text-gray-300">Are you sure you want to cancel the booking for <strong class="text-white">Alex Johnson</strong> at <strong class="text-white">Urban Kickers</strong>? This action cannot be undone and may trigger a refund.</p>
+            <div class="modal-action">
+                <form method="dialog" class="flex gap-3">
+                    <button class="btn btn-ghost hover:bg-gray-700 px-4 text-gray-300 border border-gray-600">
+                        Keep Booking
+                    </button>
+                    <a href="#" class="btn bg-red-600 hover:bg-red-700 text-white border-none shadow-lg shadow-red-900/30">
+                        Confirm Cancellation
+                    </a>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Cancel Modal for Maria Garcia -->
+    <dialog id="cancelModal2" class="modal backdrop-blur-sm">
+        <div class="modal-box bg-gray-800 border border-gray-700 rounded-xl shadow-2xl">
+            <div class="flex items-center mb-4">
+                <div class="p-2 rounded-full bg-red-900/30 mr-3">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-400" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-100">Cancel Booking?</h3>
+            </div>
+            <p class="py-4 text-gray-300">Are you sure you want to cancel the booking for <strong class="text-white">Maria Garcia</strong> at <strong class="text-white">Goal Getters Field</strong>? This action cannot be undone.</p>
+            <div class="modal-action">
+                <form method="dialog" class="flex gap-3">
+                    <button class="btn btn-ghost hover:bg-gray-700 px-4 text-gray-300 border border-gray-600">
+                        Keep Booking
+                    </button>
+                    <a href="#" class="btn bg-red-600 hover:bg-red-700 text-white border-none shadow-lg shadow-red-900/30">
+                        Confirm Cancellation
+                    </a>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurfZone - Book Your Game</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom styles to apply the Inter font */
+         html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Style for the hero section background image */
+        .hero-section {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../../media/homefootball.png');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <!-- Header -->
+    <header class="bg-gray-900/80 backdrop-blur-sm fixed w-full z-50 top-0">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-green-400">TurfZone</a>
+            <nav class="hidden md:flex space-x-8 items-center">
+                <a href="#features" class="hover:text-green-400 transition-colors">Features</a>
+                <a href="#sports" class="hover:text-green-400 transition-colors">Sports</a>
+                <a href="#how-it-works" class="hover:text-green-400 transition-colors">How It Works</a>
+                <a href="{% url 'login' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors ">Book Now</a>
+            </nav>
+            <button class="md:hidden text-white focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <main class="pt-16">
+        <section class="hero-section h-[calc(100vh-4rem)] flex items-center justify-center text-center">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Find & Book the Best Sports Turf Near You</h1>
+                <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-3xl mx-auto">Your game is just a few clicks away. Instant booking, multiple sports, and prime locations.</p>
+                <a href="{% url 'login' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-lg text-lg transition">Book Your Turf Now</a>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-20 bg-gray-800">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl font-bold mb-2">Why Choose TurfZone?</h2>
+                <p class="text-gray-400 mb-12">We provide the best turf booking experience.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="bg-gray-900 p-8 rounded-lg hover:scale-105 transition">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <h3 class="text-xl font-bold mb-2">Easy Online Booking</h3>
+                        <p class="text-gray-400">Book your preferred slot anytime, anywhere with our seamless online system.</p>
+                    </div>
+                    <!-- Feature 2 -->
+                    <div class="bg-gray-900 p-8 rounded-lg hover:scale-105 transition">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" /></svg>
+                        <h3 class="text-xl font-bold mb-2">Multiple Sports</h3>
+                        <p class="text-gray-400">From football to cricket, we have turfs suitable for a variety of sports.</p>
+                    </div>
+                    <!-- Feature 3 -->
+                    <div class="bg-gray-900 p-8 rounded-lg hover:scale-105 transition">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <h3 class="text-xl font-bold mb-2">Prime Locations</h3>
+                        <p class="text-gray-400">Our turfs are conveniently located in the heart of the city for easy access.</p>
+                    </div>
+                    <!-- Feature 4 -->
+                    <div class="bg-gray-900 p-8 rounded-lg hover:scale-105 transition">
+                         <svg class="w-12 h-12 mx-auto mb-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01"></path><path d="M7 12h.01M17 12h.01M12 17h.01"></path><path d="M12 4.5A7.5 7.5 0 004.5 12a7.5 7.5 0 007.5 7.5 7.5 7.5 0 007.5-7.5A7.5 7.5 0 0012 4.5z"></path></svg>
+                        <h3 class="text-xl font-bold mb-2">Best Prices</h3>
+                        <p class="text-gray-400">Enjoy your game without breaking the bank with our competitive pricing.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Available Sports Section -->
+        <section id="sports" class="py-20 bg-gray-900">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">Play Your Favorite Sport</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Sport Card 1: Football -->
+                    <div class="relative rounded-lg overflow-hidden group">
+                        <img src="https://tse2.mm.bing.net/th/id/OIP.MnNSDhhT6DA1vkoaWKZeYQHaEK?rs=1&pid=ImgDetMain&o=7&rm=3" alt="Football on turf" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-60 flex items-end p-6">
+                            <h3 class="text-2xl font-bold">Football</h3>
+                        </div>
+                    </div>
+                    <!-- Sport Card 2: Cricket -->
+                    <div class="relative rounded-lg overflow-hidden group">
+                        <img src="https://tse4.mm.bing.net/th/id/OIP.3pw96X6WFuxSMbXZWUm9uwHaE8?pid=ImgDet&w=474&h=316&rs=1&o=7&rm=3" alt="Cricket on turf" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-60 flex items-end p-6">
+                            <h3 class="text-2xl font-bold">Cricket</h3>
+                        </div>
+                    </div>
+                    <!-- Sport Card 3: Tennis -->
+                    <div class="relative rounded-lg overflow-hidden group">
+                        <img src="https://cdn.pixabay.com/photo/2018/05/28/23/37/tennis-3437567_960_720.jpg" alt="Tennis court" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-60 flex items-end p-6">
+                            <h3 class="text-2xl font-bold">Tennis</h3>
+                        </div>
+                    </div>
+                    <!-- Sport Card 4: Hockey -->
+                    <div class="relative rounded-lg overflow-hidden group">
+                        <img src="https://media.gettyimages.com/photos/ice-hockey-player-scoring-picture-id523003965?b=1&k=6&m=523003965&s=612x612&w=0&h=lb7NfP_PaAvS3rmYhFgWkDsNiGr9TeXRcDcYhE3y2jM=" alt="Hockey field" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black bg-opacity-60 flex items-end p-6">
+                            <h3 class="text-2xl font-bold">Hockey</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- How It Works Section -->
+        <section id="how-it-works" class="py-20 bg-gray-800">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-12">Get Started in 3 Easy Steps</h2>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16">
+                    <!-- Step 1 -->
+                    <div class="flex items-center flex-col text-center">
+                        <div class="bg-green-500 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mb-4">1</div>
+                        <h3 class="text-xl font-bold mb-2">Search</h3>
+                        <p class="text-gray-400 max-w-xs">Find a turf by location, sport, and date.</p>
+                    </div>
+                    <div class="hidden md:block text-gray-600 text-4xl">→</div>
+                    <!-- Step 2 -->
+                    <div class="flex items-center flex-col text-center">
+                        <div class="bg-green-500 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mb-4">2</div>
+                        <h3 class="text-xl font-bold mb-2">Select</h3>
+                        <p class="text-gray-400 max-w-xs">Choose your preferred time slot and book instantly.</p>
+                    </div>
+                     <div class="hidden md:block text-gray-600 text-4xl">→</div>
+                    <!-- Step 3 -->
+                    <div class="flex items-center flex-col text-center">
+                        <div class="bg-green-500 text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold mb-4">3</div>
+                        <h3 class="text-xl font-bold mb-2">Play</h3>
+                        <p class="text-gray-400 max-w-xs">Arrive at the turf and enjoy your game!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-gray-900 border-t border-gray-800">
+        <div class="container mx-auto px-6 py-12">
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- About -->
+                <div>
+                    <h3 class="text-xl font-bold text-green-400 mb-4">TurfZone</h3>
+                    <p class="text-gray-400">The easiest way to book premium sports facilities. We are passionate about sports and making them accessible to everyone.</p>
+                </div>
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul>
+                        <li class="mb-2"><a href="#" class="hover:text-green-400 transition-colors">Home</a></li>
+                        <li class="mb-2"><a href="#features" class="hover:text-green-400 transition-colors">Features</a></li>
+                        <li class="mb-2"><a href="#sports" class="hover:text-green-400 transition-colors">Sports</a></li>
+                        <li class="mb-2"><a href="#" class="hover:text-green-400 transition-colors">Contact Us</a></li>
+                    </ul>
+                </div>
+                <!-- Contact & Socials -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
+                    <p class="text-gray-400 mb-4">123 Sports Lane, Mumbai, India</p>
+                    <p class="text-gray-400 mb-4">Email: contact@turfzone.com</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd" /></svg></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.013-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.343 2.525c.636-.247 1.363-.416 2.427-.465C9.793 2.013 10.148 2 12.315 2zm0 1.623c-2.372 0-2.686.009-3.637.053-.935.044-1.51.189-1.944.364a3.27 3.27 0 00-1.18.795 3.27 3.27 0 00-.795 1.18c-.175.434-.32.909-.364 1.944-.044.951-.053 1.265-.053 3.637s.009 2.686.053 3.637c.044.935.189 1.51.364 1.944a3.27 3.27 0 00.795 1.18 3.27 3.27 0 001.18.795c.434.175.909.32 1.944.364.951.044 1.265.053 3.637.053s2.686-.009 3.637-.053c.935-.044 1.51-.189 1.944-.364a3.27 3.27 0 001.18-.795 3.27 3.27 0 00.795-1.18c.175-.434.32-.909.364-1.944.044-.951.053-1.265.053-3.637s-.009-2.686-.053-3.637c-.044-.935-.189-1.51-.364-1.944a3.27 3.27 0 00-.795-1.18 3.27 3.27 0 00-1.18-.795c-.434-.175-.909-.32-1.944-.364-.951-.044-1.265-.053-3.637-.053zM12 9.75a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5zm0-1.623a3.873 3.873 0 110 7.746 3.873 3.873 0 010-7.746zM20.25 7.5a1.25 1.25 0 10-2.5 0 1.25 1.25 0 002.5 0z" clip-rule="evenodd" /></svg></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12 border-t border-gray-800 pt-8 text-center text-gray-500">
+                <p>&copy; 2025 TurfZone. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+{% include "message.html" %}
+</body>
+</html>

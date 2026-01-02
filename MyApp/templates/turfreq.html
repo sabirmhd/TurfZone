@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TurfZone - Turf Requests</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles to integrate with Tailwind */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #111827;
+            /* bg-gray-900 */
+        }
+
+        /* Custom scrollbar for a better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+            /* bg-gray-800 */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            /* indigo-600 */
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4338ca;
+            /* indigo-700 */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-gray-200">
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 flex-shrink-0 bg-gray-800 p-6 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-3 mb-10">
+                    <i class="fas fa-futbol text-green-400 text-3xl"></i>
+                    <h1 class="text-2xl font-bold text-white">TurfZone</h1>
+                </div>
+                <!-- Navigation Links -->
+                <nav class="flex flex-col gap-4">
+                    <a href="{% url 'admindash' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-tachometer-alt w-6 text-center"></i>
+                        <span class="font-semibold">Dashboard</span>
+                    </a>
+                    <a href="{% url 'manageusers' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-users w-6 text-center"></i>
+                        <span>Manage Users</span>
+                    </a>
+                    <!-- Active Link -->
+                    <a href="{% url 'turfreq' %}"
+                        class="flex items-center gap-3 p-3 rounded-lg bg-gray-900 text-white shadow-md">
+                        <i class="fas fa-file-signature w-6 text-center text-green-400"></i>
+                        <span>Turf Requests</span>
+                    </a>
+                    <a href="{% url 'manageturf' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-layer-group w-6 text-center"></i>
+                        <span>Manage Turfs</span>
+                    </a>
+                    <a href="{% url 'managebookings' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-calendar-check w-6 text-center"></i>
+                        <span>Monitor Bookings</span>
+                    </a>
+                    <a href="{% url 'managepayments' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-credit-card w-6 text-center"></i>
+                        <span>Payment Management</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="border-t border-gray-700 pt-4">
+                <a href="{% url 'logout' %}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-sign-out-alt w-6 text-center text-red-400"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8 overflow-y-auto">
+            <!-- Header -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-white">Manage Turf Requests</h2>
+                    <p class="text-gray-400">Review and approve or reject new turf submissions.</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button
+                        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                        <i class="fas fa-filter"></i>
+                        <span>Filter</span>
+                    </button>
+                    <img src="https://placehold.co/100x100/1f2937/a7f3d0?text={{ request.user.fullname|slice:':1' }}" alt="Admin"
+                        class="w-10 h-10 rounded-full border-2 border-green-400">
+                </div>
+            </header>
+
+            <!-- Turf Request Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+
+                <!-- Card 1 -->
+                {% if pending_turfs %}
+                {% for turf in pending_turfs %}
+                <div
+                    class="bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300">
+                    <img src="{{ turf.image1.url }}" alt="Turf Image"
+                        class="w-full h-48 object-cover">
+                    <div class="p-5">
+                        <h3 class="text-xl font-bold text-white mb-2">{{ turf.turf_name }}</h3>
+                        <div class="flex flex-col gap-3 text-gray-400 mb-4">
+                            <div class="flex items-center gap-2"><i
+                                    class="fas fa-map-marker-alt w-4 text-center text-green-400"></i><span>{{ turf.address }}</span></div>
+                            <div class="flex items-center gap-2"><i
+                                    class="fas fa-futbol w-4 text-center text-green-400"></i><span>{{ turf.sport_type }}</span></div>
+                            <div class="flex items-center gap-2"><i
+                                    class="fas fa-dollar-sign w-4 text-center text-green-400"></i><span>₹{{ turf.price_per_hour }}/hr</span></div>
+                        </div>
+                        <div class="border-t border-gray-700 pt-4 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <img src="https://placehold.co/200x200/1f2937/a7f3d0?text={{ turf.owner.fullname|slice:':1' }}"
+                                    class="w-8 h-8 rounded-full border-2 border-green-500 p-0.5">
+                                <span class="text-sm font-medium">{{ turf.owner.fullname }}</span>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button onclick="document.getElementById('approveModal{{ turf.id }}').showModal()"
+                                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Approve</button>
+                                <button onclick="document.getElementById('rejectModal{{ turf.id }}').showModal()"
+                                    class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Reject</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Approve Modal -->
+                                <dialog id="approveModal{{ turf.id }}" class="modal backdrop-blur-sm">
+                                    <div class="modal-box bg-gray-800 border border-gray-700 rounded-xl shadow-2xl">
+                                        <div class="flex items-center mb-4">
+                                            <div class="p-2 rounded-full bg-green-900/30 mr-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-xl font-bold text-gray-100">Approve {{ turf.turf_name }}?
+                                            </h3>
+                                        </div>
+                                        <p class="py-4 text-gray-300">Are you sure you want to approve this turf request
+                                            from {{ turf.owner.fullname }}?</p>
+                                        <div class="modal-action">
+                                            <form method="dialog" class="flex gap-3">
+                                                <button
+                                                    class="btn btn-ghost hover:bg-gray-700 px-2 text-gray-300 border border-gray-600">
+                                                    Cancel
+                                                </button>
+                                                <a href="{% url 'approve_turf' turf.id %}"
+                                                    class="btn bg-green-600 hover:bg-green-700 text-white border-none shadow-lg shadow-green-900/30">
+                                                    Confirm Approval
+                                                </a>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </dialog>
+
+                                <!-- Reject Modal -->
+                                <dialog id="rejectModal{{ turf.id }}" class="modal backdrop-blur-sm">
+                                    <div class="modal-box bg-gray-800 border border-gray-700 rounded-xl shadow-2xl">
+                                        <div class="flex items-center mb-4">
+                                            <div class="p-2 rounded-full bg-red-900/30 mr-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-400"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-xl font-bold text-gray-100">Reject {{ turf.turf_name }}?
+                                            </h3>
+                                        </div>
+                                        <p class="py-4 text-gray-300">Are you sure you want to reject this turf request
+                                            from {{ turf.owner.fullname }}?</p>
+                                        <div class="modal-action">
+                                            <form method="dialog" class="flex gap-3">
+                                                <button
+                                                    class="btn btn-ghost hover:bg-gray-700 px-2 text-gray-300 border border-gray-600">
+                                                    Cancel
+                                                </button>
+                                                <a href="{% url 'reject_turf' turf.id %}"
+                                                    class="btn bg-red-600 hover:bg-red-700 text-white border-none shadow-lg shadow-red-900/30">
+                                                    Confirm Rejection
+                                                </a>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </dialog>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+            </div>
+        </main>
+    </div>
+    {% include "message.html" %}
+</body>
+</html>

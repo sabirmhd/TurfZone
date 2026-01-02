@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Details - TurfZone</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+        }
+
+        /* Custom scrollbar for a better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #22c55e;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #16a34a;
+        }
+    </style>
+</head>
+
+<body class="text-gray-200">
+
+    <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40 border-b border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="text-2xl font-bold text-white tracking-tight">
+                    <span class="text-green-400">Turf</span>Zone
+                </div>
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="{% url 'userhome' %}" class="text-gray-300 hover:text-green-400 transition">Browse
+                        Turfs</a>
+                    <a href="{% url 'listbooking' %}" class="text-green-400 font-semibold transition">My Bookings</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-300 hidden sm:block">Welcome, {{ request.user.fullname }}</span>
+                    <a href="{% url 'userpro' %}"
+                        class="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-600 hover:border-green-400 transition-colors duration-300">
+                        <img src="https://placehold.co/100x100/1f2937/a7f3d0?text={{ request.user.fullname|slice:':1' }}"
+                            alt="Profile" class="w-full h-full object-cover">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="py-8 md:py-15">
+            <div class="container mx-auto px-4">
+
+                <div class="mb-8">
+                    <a href="{% url 'userhome' %}"
+                        class="inline-flex items-center text-gray-400 hover:text-green-400 transition-colors duration-300 group">
+                        <i data-feather="arrow-left"
+                            class="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1"></i>
+                        Back to Explore Turfs
+                    </a>
+                    <h1 class="text-4xl font-extrabold text-white mt-4">Booking History</h1>
+                    <p class="text-gray-400">Booking ID: #TZ102-20250810</p>
+                </div>
+                {% for books in bookings %}
+                <div
+                    class="bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl shadow-black/20 overflow-hidden mt-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-5">
+
+                        <div class="lg:col-span-2">
+
+                            <img src="{{ books.turf.image1.url }}" alt="{{ books.turf.turf_name }}"
+                                class="w-full h-64 lg:h-full object-cover">
+                        </div>
+
+                        <div class="lg:col-span-3 p-6 md:p-10 flex flex-col">
+                            <div>
+                                <h2 class="text-3xl font-bold text-white">{{ books.turf.turf_name }}</h2>
+                                <p class="flex items-center text-gray-400 mt-2">
+                                    <i data-feather="map-pin" class="w-4 h-4 mr-2"></i>
+                                    {{ books.turf.city }}, {{ books.turf.state }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-5 my-8 border-t border-gray-700 pt-8">
+                                <div class="flex justify-between items-center text-lg">
+                                    <span class="flex items-center text-gray-400">
+                                        <i data-feather="calendar" class="w-5 h-5 mr-3"></i>
+                                        Booking Date
+                                    </span>
+                                    <span class="font-semibold text-white">{{ books.booking_date }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-lg">
+                                    <span class="flex items-center text-gray-400">
+                                        <i data-feather="clock" class="w-5 h-5 mr-3"></i>
+                                        Time Allocated
+                                    </span>
+                                    <span class="font-semibold text-white">{{ books.start_time }} - {{ books.end_time }}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-lg">
+                                    <span class="flex items-center text-gray-400">
+                                        <i data-feather="tag" class="w-5 h-5 mr-3"></i>
+                                        Price
+                                    </span>
+                                    <span class="font-semibold text-white">{{ books.total_amount }}</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-auto">
+                                <div class="bg-gray-800 rounded-lg p-4 flex justify-between items-center">
+                                    <span class="text-xl font-bold text-gray-300">Total Paid</span>
+                                    <span class="text-3xl font-bold text-green-400">{{ books.total_amount }}</span>
+                                </div>
+
+                                <a href="{% url 'download_invoice' books.id %}"
+                                    class="mt-6 w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 transition-all duration-300 flex items-center justify-center space-x-2 text-lg">
+                                    <i data-feather="download" class="w-5 h-5"></i>
+                                    <span>Download Invoice</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 border-t border-gray-800 py-8 mt-16">
+        <div class="container mx-auto px-4 text-center text-gray-400">
+            <p>&copy; 2025 TurfZone. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Feather Icons Initialization ---
+        feather.replace();
+    </script>
+    {% include "message.html" %}
+</body>
+
+</html>
